@@ -1,0 +1,42 @@
+# K1 上 Qwen3.5-4B 的推荐运行参数
+# 依据：docs/REPORT.md §5.4 / §8.1 / §9.2 的实测结果
+
+model: Qwen3.5-4B-Q4_0-self.gguf
+runtime: "llama.cpp 0.1.1 (apt, legacy IME1 backend)"
+
+threads: 4              # 同 2B，硬约束
+ctx: 4096               # 可开至 32768（实测 RSS 3.57GB，8GB 内存可行）
+flash_attn: true
+mmap: false
+batch: 2048
+ubatch: 512
+embd_quant: q8_0
+
+# 实测基线（口径 -t4 -fa1 -mmp0 -r2）
+expected:
+  pp64: 8.93
+  pp512: 8.10
+  tg128: 1.43
+  effective_bandwidth_gbps: 3.84    # 2.50GiB × 1.43
+
+# 与官方的对比（唯一变量：谁量的化）
+vs_official:
+  pp64:   { official: 3.94, self: 8.93, delta: "+126.6%" }
+  pp512:  { official: 3.80, self: 8.10, delta: "+113.2%" }
+  tg128:  { official: 1.32, self: 1.43, delta: "+8.3%" }
+
+# 内存实测（-c 32768 --no-mmap，/usr/bin/time -v）
+memory:
+  weights_gib: 2.40
+  kv_32k_gib: 1.00          # 32 KiB/token × 32768
+  constant_mib: 110
+  peak_rss_gb: 3.57
+  max_context_feasible: "~160K（256K 时需 ~10.5GB，超出 8GB）"
+
+notes: |
+  1. 4B 的收益比 2B 更大（+113.2% vs +87.8%），因为层数更多（32 vs 24），
+     落在白名单外的 ssm_out 张量绝对数量更多（24 vs 18）。
+  2. 4B 的 decode 首次出现正收益（+8.3%），疑因官方文件的 token_embd
+     为 Q6_K（不在白名单），自产改为 Q8_0 后改善。
+  3. 长上下文吞吐曲线未测（受时间限制），仅验证 32K 可加载并正常生成。
+  4. Q4_K_M 在 4B 上代价更大：体积仅 +6.4%，prefill 却只有 Q4_0 的 54%。

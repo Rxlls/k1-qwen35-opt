@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>K1 Qwen3.5 推理优化 · 结果图表</title>
+<style>
+:root{--bg:#fff;--tx:#1c1c1e;--mut:#8a8a90;--bd:#e6e6ea;
+      --blue:#0a6cff;--red:#d64545;--green:#0f9d58;--amber:#e8a33d;--grey:#b9b9c0;}
+*{box-sizing:border-box}
+body{margin:0;background:#f6f6f8;color:var(--tx);
+     font:14px/1.6 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+.page{max-width:1000px;margin:0 auto;padding:28px 24px 60px}
+h1{font-size:20px;margin:0 0 4px}
+.sub{color:var(--mut);font-size:13px;margin-bottom:26px}
+.card{background:var(--bg);border:1px solid var(--bd);border-radius:12px;
+      padding:22px 24px;margin-bottom:22px}
+.card h2{font-size:15px;margin:0 0 3px;font-weight:650}
+.card .note{color:var(--mut);font-size:12.5px;margin-bottom:18px}
+.legend{display:flex;gap:18px;font-size:12.5px;color:#555;margin-top:14px;flex-wrap:wrap}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;
+          margin-right:6px;vertical-align:-1px}
+.row{margin-bottom:13px}
+.row .lbl{font-size:13px;margin-bottom:4px;display:flex;justify-content:space-between}
+.row .lbl b{font-variant-numeric:tabular-nums}
+.track{height:22px;background:#f1f1f4;border-radius:5px;overflow:hidden;position:relative}
+.track>i{display:block;height:100%;border-radius:5px}
+svg{display:block;max-width:100%;height:auto}
+.axis{stroke:#d8d8de;stroke-width:1}
+.gl{stroke:#eeeef2;stroke-width:1}
+.tick{font-size:11px;fill:#9a9aa2}
+.val{font-size:11px;font-weight:650}
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1>K1 Qwen3.5 推理优化 · 结果图表</h1>
+<div class="sub">进迭时空 K1（8×X60 @1.6GHz / 8GB LPDDR4x-2666 / Bianbu 2.3.5）· 运行时 llama.cpp 0.1.1 · 口径 -t 4 -fa 1 -mmp 0</div>
+
+<!-- 图1 -->
+<div class="card">
+  <h2>图 1　核心成果：自建量化管线的跨模型收益</h2>
+  <div class="note">唯一变量为"GGUF 由谁量化"；同一运行时、同一机器、同一 Q4_0 格式、同一口径</div>
+
+  <div class="row">
+    <div class="lbl"><span>2B · 官方 unsloth（基线 B1）</span><b>pp512 10.84 t/s</b></div>
+    <div class="track"><i style="width:53.2%;background:#c9c9d2"></i></div>
+  </div>
+  <div class="row">
+    <div class="lbl"><span>2B · 自产统一 Q4_0（本方案 O）</span><b>20.36 t/s　+87.8%</b></div>
+    <div class="track"><i style="width:100%;background:var(--blue)"></i></div>
+  </div>
+  <div class="row" style="margin-top:20px">
+    <div class="lbl"><span>4B · 官方 unsloth（基线 B1）</span><b>pp512 3.80 t/s</b></div>
+    <div class="track"><i style="width:18.7%;background:#c9c9d2"></i></div>
+  </div>
+  <div class="row">
+    <div class="lbl"><span>4B · 自产统一 Q4_0（本方案 O）</span><b>8.10 t/s　+113.2%</b></div>
+    <div class="track"><i style="width:39.8%;background:var(--blue)"></i></div>
+  </div>
+  <div class="legend">
+    <span><i style="background:#c9c9d2"></i>官方 GGUF（unsloth Dynamic 混合精度）</span>
+    <span><i style="background:var(--blue)"></i>自产 GGUF（统一 Q4_0）</span>
+  </div>
+  <div class="note" style="margin:14px 0 0">
+    根因：官方文件混用 Q5_K / Q6_K / Q8_0 等类型，均不在 K1 的 IME 加速白名单内，prefill 通路整体退化为通用实现。<br>
+    4B 的 decode 亦获 +8.3%（1.32 → 1.43 t/s），2B decode 持平（2.84 → 2.80）。
+  </div>
+</div>
+
+<!-- 图2 -->
+<div class="card">
+  <h2>图 2　长上下文吞吐衰减（2B，d = 预填充深度）</h2>
+  <div class="note">左：prefill（pp512）　右：decode（tg64）　· 0/4K/8K 为 r=2，16K 为 r=1</div>
+
+  <svg viewBox="0 0 860 260" role="img" aria-label="长上下文衰减曲线">
+    <!-- 左图 prefill -->
+    <g transform="translate(0,0)">
+      <text x="60" y="18" class="tick" style="font-size:12px;fill:#555;font-weight:650">prefill  pp512 (t/s)</text>
+      <!-- 网格 -->
+      <line x1="60" y1="40"  x2="380" y2="40"  class="gl"/>
+      <line x1="60" y1="90"  x2="380" y2="90"  class="gl"/>
+      <line x1="60" y1="140" x2="380" y2="140" class="gl"/>
+      <line x1="60" y1="190" x2="380" y2="190" class="gl"/>
+      <line x1="60" y1="40"  x2="60"  y2="220" class="axis"/>
+      <line x1="60" y1="220" x2="380" y2="220" class="axis"/>
+      <text x="52" y="44"  class="tick" text-anchor="end">22</text>
+      <text x="52" y="94"  class="tick" text-anchor="end">16</text>
+      <text x="52" y="144" class="tick" text-anchor="end">11</text>
+      <text x="52" y="194" class="tick" text-anchor="end">5</text>
+      <text x="52" y="224" class="tick" text-anchor="end">0</text>
+      <text x="60"  y="240" class="tick" text-anchor="middle">0</text>
+      <text x="160" y="240" class="tick" text-anchor="middle">4K</text>
+      <text x="260" y="240" class="tick" text-anchor="middle">8K</text>
+      <text x="360" y="240" class="tick" text-anchor="middle">16K</text>
+
+      <!-- 自产线：20.24, 14.65, 11.76, 8.17 -->
+      <polyline points="60,36 160,87 260,113 360,146"
+                fill="none" stroke="#0a6cff" stroke-width="2.5"/>
+      <circle cx="60"  cy="36"  r="4" fill="#0a6cff"/>
+      <circle cx="160" cy="87"  r="4" fill="#0a6cff"/>
+      <circle cx="260" cy="113" r="4" fill="#0a6cff"/>
+      <circle cx="360" cy="146" r="4" fill="#0a6cff"/>
+      <text x="66"  y="30"  class="val" fill="#0a6cff">20.24</text>
+      <text x="166" y="81"  class="val" fill="#0a6cff">14.65</text>
+      <text x="266" y="107" class="val" fill="#0a6cff">11.76</text>
+      <text x="366" y="140" class="val" fill="#0a6cff">8.17</text>
+
+      <!-- 官方线：10.78, 9.00, 7.75, 6.01 -->
+      <polyline points="60,122 160,138 260,150 360,165"
+                fill="none" stroke="#d64545" stroke-width="2.5" stroke-dasharray="6 4"/>
+      <circle cx="60"  cy="122" r="4" fill="#d64545"/>
+      <circle cx="160" cy="138" r="4" fill="#d64545"/>
+      <circle cx="260" cy="150" r="4" fill="#d64545"/>
+      <circle cx="360" cy="165" r="4" fill="#d64545"/>
+      <text x="66"  y="116" class="val" fill="#d64545">10.78</text>
+      <text x="166" y="132" class="val" fill="#d64545">9.00</text>
+      <text x="266" y="144" class="val" fill="#d64545">7.75</text>
+      <text x="366" y="159" class="val" fill="#d64545">6.01</text>
+    </g>
+
+    <!-- 右图 decode -->
+    <g transform="translate(470,0)">
+      <text x="60" y="18" class="tick" style="font-size:12px;fill:#555;font-weight:650">decode  tg64 (t/s)</text>
+      <line x1="60" y1="40"  x2="380" y2="40"  class="gl"/>
+      <line x1="60" y1="90"  x2="380" y2="90"  class="gl"/>
+      <line x1="60" y1="140" x2="380" y2="140" class="gl"/>
+      <line x1="60" y1="190" x2="380" y2="190" class="gl"/>
+      <line x1="60" y1="40"  x2="60"  y2="220" class="axis"/>
+      <line x1="60" y1="220" x2="380" y2="220" class="axis"/>
+      <text x="52" y="44"  class="tick" text-anchor="end">3.0</text>
+      <text x="52" y="94"  class="tick" text-anchor="end">2.2</text>
+      <text x="52" y="144" class="tick" text-anchor="end">1.5</text>
+      <text x="52" y="194" class="tick" text-anchor="end">0.7</text>
+      <text x="52" y="224" class="tick" text-anchor="end">0</text>
+      <text x="60"  y="240" class="tick" text-anchor="middle">0</text>
+      <text x="160" y="240" class="tick" text-anchor="middle">4K</text>
+      <text x="260" y="240" class="tick" text-anchor="middle">8K</text>
+      <text x="360" y="240" class="tick" text-anchor="middle">16K</text>
+
+      <!-- 自产：2.81, 2.20, 1.83, 1.26 -->
+      <polyline points="60,45 160,85 260,110 360,148"
+                fill="none" stroke="#0a6cff" stroke-width="2.5"/>
+      <circle cx="60"  cy="45"  r="4" fill="#0a6cff"/>
+      <circle cx="160" cy="85"  r="4" fill="#0a6cff"/>
+      <circle cx="260" cy="110" r="4" fill="#0a6cff"/>
+      <circle cx="360" cy="148" r="4" fill="#0a6cff"/>
+
+      <!-- 官方：2.84, 2.16, 1.82, 1.30 -->
+      <polyline points="60,43 160,88 260,111 360,145"
+                fill="none" stroke="#d64545" stroke-width="2.5" stroke-dasharray="6 4"/>
+      <circle cx="60"  cy="43"  r="4" fill="#d64545"/>
+      <circle cx="160" cy="88"  r="4" fill="#d64545"/>
+      <circle cx="260" cy="111" r="4" fill="#d64545"/>
+      <circle cx="360" cy="145" r="4" fill="#d64545"/>
+
+      <text x="150" y="170" class="tick" style="font-size:11.5px;fill:#666">
+        两条曲线几乎重合（差异 ≤3.1%）
+      </text>
+      <text x="150" y="188" class="tick" style="font-size:11.5px;fill:#666">
+        ⇒ decode 衰减与权重量化无关
+      </text>
+    </g>
+  </svg>
+
+  <div class="legend">
+    <span><i style="background:#0a6cff"></i>自产统一 Q4_0</span>
+    <span><i style="background:#d64545"></i>官方 unsloth 混合精度</span>
+  </div>
+  <div class="note" style="margin-top:14px">
+    prefill 保持率：自产 40.4% vs 官方 55.8%　·　decode 保持率：自产 44.8% vs 官方 45.8%<br>
+    优势随深度收窄（+87.8% → +35.9%），因为增益来自权重矩阵乘，而注意力开销随上下文线性增长、两版完全相同。
+  </div>
+</div>
+
+<!-- 图3 -->
+<div class="card">
+  <h2>图 3　量化类型与 IME 白名单：二元判定而非连续梯度</h2>
+  <div class="note">4B 模型，同一转换管线，唯一变量为量化类型</div>
+
+  <div class="row">
+    <div class="lbl"><span>Q4_0　✅ 白名单内 · 6.9 min · 55°C+</span><b>pp512 8.10 t/s</b></div>
+    <div class="track"><i style="width:100%;background:var(--green)"></i></div>
+  </div>
+  <div class="row">
+    <div class="lbl"><span>Q4_K_M　✅ 白名单内 · 10.7 min · 55°C+</span><b>4.37 t/s</b></div>
+    <div class="track"><i style="width:54%;background:#5cb87a"></i></div>
+  </div>
+  <div class="row">
+    <div class="lbl"><span>Q5_K_M　❌ 白名单外 · 50 min 未完成 · <b style="color:var(--red)">32°C</b></span><b>无法完成</b></div>
+    <div class="track"><i style="width:7%;background:#f0c6c6"></i></div>
+  </div>
+  <div class="row">
+    <div class="lbl"><span>Q3_K_M　❌ 白名单外 · 20 min 未完成 · <b style="color:var(--red)">31°C</b></span><b>无法完成</b></div>
+    <div class="track"><i style="width:7%;background:#f0c6c6"></i></div>
+  </div>
+  <div class="note" style="margin:16px 0 0">
+    <b>温度判据</b>：4 核满载执行 IME 向量指令时 SoC 达 55°C 以上；走通用标量路径时 CPU 占用仍 390%，温度仅 31~32°C——每周期有效运算极低。<br>
+    ⇒ 判断某格式是否命中加速路径，启动后看 30 秒温度即可，无需等待数十分钟的基准跑完。
+  </div>
+</div>
+
+<!-- 图4 -->
+<div class="card">
+  <h2>图 4　线程数陷阱：K1 上"越多越快"不成立</h2>
+  <div class="note">2B 官方 Q4_0，同一运行时，唯一变量为 -t 参数</div>
+
+  <div class="row">
+    <div class="lbl"><span>-t 4（官方推荐）</span><b>decode 2.84 t/s　·　prefill 10.40 t/s</b></div>
+    <div class="track"><i style="width:100%;background:var(--blue)"></i></div>
+  </div>
+  <div class="row">
+    <div class="lbl"><span>-t 8</span><b style="color:var(--red)">decode 0.86 t/s（−70%）·　prefill 10.40 t/s（不变）</b></div>
+    <div class="track"><i style="width:30%;background:var(--red)"></i></div>
+  </div>
+  <div class="note" style="margin:16px 0 0">
+    prefill 完全不受影响 ⇒ 崩塌的是低频的 TCM/IME 同步路径，而非算力。<br>
+    官方文档"K1 ≤ 4 线程"不是保守建议，是硬约束。
+  </div>
+</div>
+
+</div>
+</body>
+</html>

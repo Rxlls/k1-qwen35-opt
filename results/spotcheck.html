@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>人工抽检 · 3 题</title>
+<style>
+:root{--bg:#f7f7f9;--card:#fff;--bd:#e3e3e8;--tx:#1c1c1e;--mut:#8a8a90;
+      --blue:#0a6cff;--green:#0f9d58;--amber:#e8a33d;--red:#d64545;--purple:#7c4dff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);
+     font:15px/1.65 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+header{background:#fff;border-bottom:1px solid var(--bd);padding:16px 24px}
+h1{font-size:17px;margin:0 0 4px}
+.sub{color:var(--mut);font-size:13px}
+.wrap{max-width:1180px;margin:0 auto;padding:22px 24px 140px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;
+      padding:20px 22px;margin-bottom:20px}
+.qhead{display:flex;align-items:baseline;gap:10px;margin-bottom:12px}
+.tag{font-size:12px;font-weight:700;color:#fff;background:#5b5b63;
+     border-radius:5px;padding:2px 8px;flex:none}
+.qtext{font-weight:600}
+.check{background:#f3f7ff;border:1px solid #d6e4ff;border-radius:9px;
+       padding:12px 16px;margin-bottom:16px;font-size:14px}
+.check h4{margin:0 0 8px;font-size:13px;color:var(--blue);letter-spacing:.3px}
+.check ul{margin:0;padding-left:20px}
+.check li{margin:4px 0}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:820px){.cols{grid-template-columns:1fr}}
+.col{border:1px solid var(--bd);border-radius:9px;overflow:hidden;background:#fcfcfd}
+.col h3{margin:0;padding:7px 12px;font-size:12.5px;font-weight:650;color:#555;
+        background:#f2f2f5;border-bottom:1px solid var(--bd)}
+.body{padding:12px 14px;white-space:pre-wrap;word-break:break-word;
+      max-height:340px;overflow:auto;font-size:14px;line-height:1.7}
+.acts{display:flex;gap:10px;margin-top:14px;align-items:center;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;border:1px solid var(--bd);background:#fff;
+       border-radius:8px;padding:7px 14px;transition:.15s}
+button:hover{border-color:#c8c8d0}
+button.sel{background:var(--blue);color:#fff;border-color:var(--blue)}
+.verdict{margin-left:auto;font-size:13px;font-weight:650}
+.verdict.ok{color:var(--green)}
+.verdict.no{color:var(--red)}
+.foot{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--bd);
+      padding:12px 24px;display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap}
+.stat{font-size:13px;color:var(--mut)}
+.stat b{color:var(--tx)}
+</style>
+</head>
+<body>
+<header>
+  <h1>人工抽检 · 3 题</h1>
+  <div class="sub">用于锚定 10 个 LLM 的盲评结论。每题都给了"参考要点"，按要点判断即可，不需要专业知识。</div>
+</header>
+<div class="wrap" id="list"></div>
+<div class="foot">
+  <span class="stat">已评 <b id="n">0</b>/<b id="tot">0</b>　与 LLM 一致 <b id="agree">0</b></span>
+  <button id="export">导出结果</button>
+</div>
+<script>
+const DATA = [{"id": "Q03", "q": "一个长方形长 8 厘米、宽 5 厘米，它的周长和面积分别是多少？请写出计算过程。", "left": "要计算该长方形的周长和面积，我们可以分别使用对应的几何公式进行推导。\n\n### 1. 周长计算\n\n长方形的周长是指其四条边长度的总和。\n- **公式**：$C = 2 \\times (长 + 宽)$\n- **已知条件**：长 $= 8$ 厘米，宽 $= 5$ 厘米\n\n**计算过程**：\n$$\n\\begin{aligned}\nC &= 2 \\times (8 + 5) \\\\\nC &= 2 \\times 13 \\\\\nC &= 26\n\\end{aligned}\n$$\n\n因此，该长方形的周长是 **26 厘米**。\n\n---\n\n### 2. 面积计算\n\n长方形的面积是指其长与宽所围成的平面区域的大小。\n- **公式**：$S = 长 \\times 宽$\n- **已知条件**：长 $= 8$ 厘米，宽 $= 5$ 厘米\n\n**计算过程**：\n$$\n\\begin", "right": "要计算长方形的周长和面积，我们需要分别使用对应的公式。\n\n### 1. 计算周长\n长方形的周长公式为：\n$$C = 2 \\times (长 + 宽)$$\n\n已知长 $= 8$ 厘米，宽 $= 5$ 厘米，代入公式计算：\n$$C = 2 \\times (8 + 5)$$\n$$C = 2 \\times 13$$\n$$C = 26$$\n\n所以，周长是 **26 厘米**。\n\n---\n\n### 2. 计算面积\n长方形的面积公式为：\n$$S = 长 \\times 宽$$\n\n已知长 $= 8$ 厘米，宽 $= 5$ 厘米，代入公式计算：\n$$S = 8 \\times 5$$\n$$S = 40$$\n\n所以，面积是 **40 平方厘米**。\n\n### 最终结论\n*   **周长**：26 厘米\n*   **面积**：40 平方", "flip": true, "llm": "官方 9:1", "llm_winner": "官方", "why": "LLM 评审中 10 份有 9 份判官方更好", "checklist": ["周长 = 2 × (8 + 5) = <b>26 厘米</b>", "面积 = 8 × 5 = <b>40 平方厘米</b>", "两数都给出且计算过程正确 → 更好", "只给出一个数、或在公式环境中途截断 → 较差"]}, {"id": "Q08", "q": "如果一台设备的内存带宽是 10.6 GB/s，模型权重是 2.5 GB，理论上每秒最多能生成多少个 token？请说明推导过程。", "left": "要计算每秒最多能生成的 token 数量，我们需要先明确**生成速度**（Token Generation Rate）与**内存带宽**（Memory Bandwidth）之间的关系。\n\n### 1. 核心推导逻辑\n\n在生成式 AI 模型中，生成速度通常受限于**显存带宽**（Memory Bandwidth）。这是因为模型需要读取权重数据来生成下一个 token。\n\n*   **公式定义**：\n    $$ \\text{每秒生成 Token 数量} = \\frac{\\text{模型总权重大小 (GB)}}{\\text{内存带宽 (GB/s)}} $$\n\n*   **关键假设**：\n    1.  **100% 利用率**：假设模型在生成过程中，显存带宽被完全利用，没有因缓存命中率低、数据预取（Prefetching）或流水线延迟导致的瓶颈。\n    2.  **无额外开销**：假设没有额外的开销（如 token 编码/解码的 CPU 开销、通信开销等），仅计算纯数据读取速度。\n    3.  **权重", "right": "要计算每秒能生成的 Token 数量，我们需要先明确**模型权重（模型大小）**与**内存带宽**之间的物理关系。\n\n### 1. 核心逻辑推导\n\n在深度学习推理中，模型权重（Weights）通常以 **浮点数（Float32）** 的形式存储。\n- **浮点数（Float32）** 占用 **4 字节（Byte）**。\n- 因此，**1 个 Token** 的权重大小 = **4 Bytes**。\n\n**推导步骤如下：**\n\n1.  **计算模型总权重大小（Bytes）：**\n    模型权重总大小 = 模型权重大小 (GB) × 4 (Bytes/GB)\n    $$ \\text{Total Weight Size} = 2.5 \\, \\text{GB} \\times 4 \\, \\text{Bytes/GB} = 10 \\, \\text{GB} $$\n\n2.  **计算每秒可加载的 Token 数量：**\n    每秒可加载的 Token 数量 = 内存带宽 (GB/s)", "flip": true, "llm": "自产 10:0（全票）", "llm_winner": "自产", "why": "LLM 评审 10 份全部判自产更好", "checklist": ["正确关系：<b>每秒 token 数 = 带宽 ÷ 权重大小 = 10.6 ÷ 2.5 ≈ 4.24 t/s</b>", "方向正确（带宽越大越快、权重越大越慢）", "常见的严重错误：声称「1 个 token 的权重 = 4 Bytes」、或算出 2.5×4=10GB 这类无意义结果 → 明显更差"]}, {"id": "Q20", "q": "如果让你向一位完全不懂计算机的人介绍你在做的事情（在 RISC-V 笔记本上优化大模型推理），你会怎么说？", "left": "如果要把“在 RISC-V 笔记本上优化大模型推理”这件事讲给一个完全不懂计算机的人听，核心思路是：**把“计算机”比作“人”，把“大模型”比作“超级大脑”，把“优化”比作“给大脑装个更聪明的引擎”**。\n\n以下是几种不同场景下的说法，你可以根据听众的耐心程度选择：\n\n---\n\n### 场景一：给非技术人员（最通俗版）\n**核心逻辑：用“省力”和“聪明”来比喻**\n\n“想象一下，以前我们训练一个超级聪明的‘超级大脑’（大模型），它虽然能解决所有问题，但每次‘思考’都要消耗巨大的能量，就像一个人用尽全力去搬石头，累且慢。\n\n现在，我们换了一个更聪明的‘引擎’（RISC-V 架构），它比传统引擎更省电、更灵活。我们把这个‘超级大脑’装在这个新引擎上，不仅让它跑得更快，还能让它更聪明地处理数据。\n\n**结果就是：** 同样的任务，以前需要 1", "right": "如果要把“在 RISC-V 笔记本上优化大模型推理”这个技术活讲给一个完全不懂计算机的人听，核心策略是：**把复杂的底层原理（如指令集、流水线、流水线填充）完全隐藏起来，只保留“结果”和“感受”**。\n\n这就好比把“用乐高积木搭出摩天大楼”讲给一个只想看“能不能盖成”的人听。\n\n以下是几种不同场景的“翻译”版本：\n\n---\n\n### 版本一：最通俗的“结果导向”版（适合非技术人员）\n**核心逻辑**：只说“我做了什么”和“得到了什么”，不解释“怎么做”。\n\n> “大家好，我最近正在做一个**超级快**的‘大模型’（比如通义千问、文心一言这种）。\n>\n> 以前，这些大模型需要超级强大的电脑才能跑，就像以前要跑一个超级大的游戏，需要好几台电脑同时开，而且还要排队很久。\n>\n> 现在，我把它搬到了**RISC-V 笔记本", "flip": false, "llm": "官方 6:4（分歧最大）", "llm_winner": "官方", "why": "LLM 评审中 6 份判官方更好、4 份判自产更好", "checklist": ["对象是完全不懂计算机的人 → 评判标准是<b>通俗</b>，不是专业", "有贴切的类比（如「像给图书馆管理员派活」这类）→ 好", "堆砌术语（RISC-V、IME、量化、KV cache）而不解释 → 差", "这题的分歧本身说明：开放性问题上「哪个更好」因人而异"]}];
+const KEY = "spotcheck_v1";
+let state = JSON.parse(localStorage.getItem(KEY) || "{}");
+const list = document.getElementById("list");
+
+function esc(s){return s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))}
+
+list.innerHTML = DATA.map(it=>`
+  <div class="card" id="c-${it.id}">
+    <div class="qhead"><span class="tag">${it.id}</span><span class="qtext">${esc(it.q)}</span></div>
+    <div class="check">
+      <h4>参考要点（据此判断，不需要懂技术细节）</h4>
+      <ul>${it.checklist.map(x=>`<li>${x}</li>`).join("")}</ul>
+    </div>
+    <div class="cols">
+      <div class="col"><h3>版本 A（左）</h3><div class="body">${esc(it.left)}</div></div>
+      <div class="col"><h3>版本 B（右）</h3><div class="body">${esc(it.right)}</div></div>
+    </div>
+    <div class="acts">
+      <button data-q="${it.id}" data-v="left">左更好</button>
+      <button data-q="${it.id}" data-v="tie">持平</button>
+      <button data-q="${it.id}" data-v="right">右更好</button>
+      <span class="verdict" id="v-${it.id}"></span>
+    </div>
+  </div>`).join("");
+
+function winnerOf(it, choice){
+  if(choice==="tie") return "持平";
+  const side = choice==="left" ? (it.flip?"自产":"官方") : (it.flip?"官方":"自产");
+  return side;
+}
+
+function refresh(){
+  const n = Object.keys(state).length;
+  document.getElementById("n").textContent = n;
+  document.getElementById("tot").textContent = DATA.length;
+  let agree = 0;
+  DATA.forEach(it=>{
+    const c = state[it.id];
+    const el = document.getElementById("v-"+it.id);
+    if(!c){ el.textContent=""; el.className="verdict"; return; }
+    const w = winnerOf(it, c);
+    const same = (w === it.llm_winner);
+    if(same) agree++;
+    el.textContent = same ? `与 LLM 评审一致（LLM: ${it.llm}）` : `与 LLM 评审不一致（LLM: ${it.llm}）`;
+    el.className = "verdict " + (same ? "ok" : "no");
+  });
+  document.getElementById("agree").textContent = agree;
+}
+
+list.addEventListener("click", e=>{
+  const b = e.target.closest("button[data-q]");
+  if(!b) return;
+  const q = b.dataset.q, v = b.dataset.v;
+  if(state[q]===v) delete state[q]; else state[q]=v;
+  localStorage.setItem(KEY, JSON.stringify(state));
+  document.querySelectorAll(`button[data-q="${q}"]`).forEach(x=>x.classList.toggle("sel", x.dataset.v===state[q]));
+  refresh();
+});
+
+document.getElementById("export").onclick = ()=>{
+  const lines = ["人工抽检结果  " + new Date().toLocaleString(), ""];
+  let agree = 0;
+  DATA.forEach(it=>{
+    const c = state[it.id] || "未评";
+    const w = c==="未评" ? "—" : winnerOf(it, c);
+    const same = (w===it.llm_winner);
+    if(same && c!=="未评") agree++;
+    const L = it.flip ? "自产" : "官方";
+    const R = it.flip ? "官方" : "自产";
+    lines.push(`${it.id}\t左=${L} 右=${R}\t我的选择=${c}\t我的结论=${w}\tLLM结论=${it.llm_winner}(${it.llm})\t${c==="未评"?"未评":(same?"一致":"不一致")}`);
+  });
+  lines.push("");
+  lines.push(`汇总: 与 LLM 评审一致 ${agree} / ${DATA.length}`);
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([lines.join("\n")], {type:"text/plain;charset=utf-8"}));
+  a.download = "spotcheck_result.txt";
+  a.click();
+};
+
+refresh();
+</script>
+</body>
+</html>

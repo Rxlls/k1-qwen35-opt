@@ -1,0 +1,40 @@
+# K1 上 Qwen3.5-2B 的推荐运行参数
+# 依据：docs/REPORT.md §5.4 / §8.3 / §9.1 的实测结果
+
+model: Qwen3.5-2B-Q4_0-self.gguf
+runtime: "llama.cpp 0.1.1 (apt, legacy IME1 backend)"
+
+threads: 4              # 硬约束：-t 8 会使 decode 从 2.84 掉到 0.86（−70%）
+ctx: 4096               # 长上下文可开到 32768（实测 RSS 1.74GB）
+flash_attn: true
+mmap: false             # 关闭 mmap，避免页缺失抖动污染延迟测量
+batch: 2048
+ubatch: 512
+embd_quant: q8_0        # 量化时 token-embedding-type
+
+# 实测基线（口径 -t4 -fa1 -mmp0 -r3）
+expected:
+  pp64: 21.08
+  pp512: 20.36
+  tg128: 2.80
+  effective_bandwidth_gbps: 3.38    # 1.22GiB × 2.80
+
+# 长上下文衰减（-p512 -n64，d=预填充深度）
+depth_pp512:
+  0: 20.24
+  4096: 14.65
+  8192: 11.76
+  16384: 8.17
+depth_tg64:
+  0: 2.81
+  4096: 2.20
+  8192: 1.83
+  16384: 1.26
+
+notes: |
+  1. 只用 Q4_0。Q4_K_M 的 prefill 只有 Q4_0 的 52%（20.36 → 10.56）。
+  2. Q5_K_M / Q3_K_M / KV q8_0 不在 IME 加速白名单，实测慢 3~7 倍，
+     判据：满载时 SoC 温度仅 31~32°C（白名单内为 55°C+）。
+  3. 短 prompt 的 prefill 速度会被固定开销拉低（8 token 时 7.97 t/s），
+     长 prompt 才能反映真实能力（1200 token 时 19.22 t/s）。
+  4. 1200 token prompt 的首字延迟约 62 秒，长文档问答不可用。
