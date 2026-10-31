@@ -22,7 +22,7 @@
 | 机型 | 进迭时空K1笔记本（MUSE Book类），8GB LPDDR4x + 128GB NVMe存储 |
 | 内存 | 总量7.7GiB，LXQt桌面空闲时占用约1.3GiB、可用6.4GiB（2026-10-28实测）；**无swap** |
 | 存储 | 系统运行于**NVMe**：nvme0n1p6=/（119G ext4）、p5=/boot（256M）；lsblk未显示eMMC设备（仅SPI mtdblock0-5），待`ls /dev/mmcblk*`复核 |
-| CPU | K1，8×X60；isa=rv64imafdcv_…_zvfh_zfh_…_ime——**v(RVV)、zvfh、ime(AI扩展)全部在位** ✅ |
+| CPU | K1，8×X60；isa=rv64imafdcv_…_zvfh_zfh_…_ime——**v(RVV)、zvfh、ime(AI扩展)全部在位** |
 
 ## 软件版本（刷机后补全）
 
@@ -115,11 +115,11 @@ cmake --install build
 
 | 探测项 | 结果 | 含义 |
 |---|---|---|
-| IME1（vmadot v2） | ✅ Success | IME1 内核可用 |
-| VMADOTN | ✅ Success | — |
-| VMADOT_S4 / S8（i4 点积） | ❌ Failed | IME2 不支持 |
-| VFWMADOT_FP16 | ❌ Failed | IME2 不支持 |
-| VPACK / VNPACK | ❌ Failed | IME2 不支持 |
+| IME1（vmadot v2） | Success | IME1 内核可用 |
+| VMADOTN | Success | — |
+| VMADOT_S4 / S8（i4 点积） | Failed | IME2 不支持 |
+| VFWMADOT_FP16 | Failed | IME2 不支持 |
+| VPACK / VNPACK | Failed | IME2 不支持 |
 
 → 本机构建只能得到 `RISCV64_SPACEMIT_IME1`。官方检测逻辑要求 i4 vmadot + vpack/vnspack 同时具备才定义 IME2，且 GCC≥15 才会追加 `-march=..._xsmtvdotii`。
 **注意**：`use_ime2: 0` 的根因是编译器缺少 IME2 指令支持，**不是 TCM 故障**（此前判断需修正）。若要 IME2 需用 SpacemiT 官方交叉工具链（v1.2.4，含 GCC15）在 x86 上交叉编译；但 K1 的 core arch id 为 `a03c`、K3 为 `a064`，K1 是否具备 IME2 硬件支持尚待验证，优先级低于先把 IME1 基线跑正。

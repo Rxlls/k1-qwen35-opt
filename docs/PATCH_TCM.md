@@ -1,9 +1,65 @@
 # PATCH 0001：TCM 设备节点路径修复
 
-> 状态：**patch 已就绪，未编译验证**
-> 目标：修复 0.1.1 与新版 TCM 驱动的接口错配，尝试让共享内存真正落在片上 TCM
+> 本文同时作为赛题要求的 **「框架改造设计说明」**（§0 为设计说明，§1–§9 为实施与验证记录，§10 为实测结论）。
+>
+> 状态：**已完成 —— 交叉编译通过，上板验证 TCM 分配成功（`is_fake_tcm: 0`），吞吐无显著变化（负结果，见 §10.5）**
+> 目标：修复 0.1.1 与新版 TCM 驱动的接口错配，验证"TCM 未生效是 prefill 偏低主因"这一假设是否成立
 
 ---
+
+## 〇、设计说明
+
+### 0.1 改造目标
+
+针对 K1 上长期存在的告警：
+
+```
+CPU_RISCV64_SPACEMIT: alloc_chunk: open(/dev/tcm_sync_mem) failed, errno=2
+CPU_RISCV64_SPACEMIT: failed to allocate init_barrier from shared mem, falling back to heap
+```
+
+**要回答的问题不是"能不能修好"，而是"修好之后性能会不会变"**。项目早期的归因假设是：TCM（片上 512 KB）未生效 → 算子间数据交换走 DDR → prefill 只有理论值的 1/4。本次改造即用于**证伪或证实该假设**。
+
+### 0.2 方案选型：为什么改这一个字符串
+
+| 候选方案 | 可行性 | 结论 |
+|---|---|---|
+| 创建软链 `/dev/tcm_sync_mem` → `/dev/tcm` | 两代节点若 ioctl 协议不同则无效 | 保留为快速试探，但不是根治 |
+| 升级运行时到 v0.2.3（原生用 `/dev/tcm`） | 可编译，但 K1 上 prefill 比 0.1.1 低 23% | **否决**：为修 A 引入更大的 B |
+| **改 0.1.1 源码中的设备路径** | 源码 tag 存在且与 apt 包 commit 一致（`17ce6aa`） | **采用** |
+
+选型的关键判据是**改动是否引入新变量**。v0.2.3 路线会同时改变后端实现与性能基线，导致"TCM 是否有效"无法单独归因；改路径则只动一个字符串，A/B 对比是干净的。
+
+### 0.3 改动范围
+
+```
+ggml/src/ggml-cpu/spacemit/spine_mem_pool.cpp:30
+- constexpr char SPINE_MEM_POOL_TCM_SYNC_MEM_DEV[] = "/dev/tcm_sync_mem";
++ constexpr char SPINE_MEM_POOL_TCM_SYNC_MEM_DEV[] = "/dev/tcm";
+```
+
+**1 行，无逻辑变更**。可行性依据：该处调用序列只有 `open()` + `mmap()`，**不含任何 ioctl**，因此不存在"两代驱动命令号不同"的兼容风险。
+
+### 0.4 预期收益与风险评估
+
+| 项 | 评估 |
+|---|---|
+| 预期收益 | 若假设成立，prefill 应有明显提升（当时基线 10.84 t/s，期望 25+） |
+| 失败模式 1 | 路径对了但 `mmap` 被拒 → 仍退回堆，性能不变（无害） |
+| 失败模式 2 | 分配成功但算子未真正使用 → 性能不变（**实测结果即此**） |
+| 回归风险 | 极低：改动是常量字符串，且新路径在不支持时仍会 `falling back to heap` |
+| 构建风险 | 中：0.1.1 的 CMake 存在上游缺陷（§10.2），需显式补两个开关 |
+
+### 0.5 验证方法（预先定义，避免事后挑选解释）
+
+1. **分配层**：启动日志是否出现 `tcm is available, blk_size: 131072, blk_num: 4, is_fake_tcm: 0`，且 `falling back to heap` 消失 → 证明 512 KB 真实 TCM 已分配。
+2. **性能层**：同一模型、同一口径 `-t 4 -p 64,512 -n 128 -fa 1`，与 apt 版对比，重复 2 次以排除波动。
+3. **判定规则**：若差异 < 2%（历史重复性 CV < 0.5%），判为"无变化"，不得解释为提升。
+
+> 三项判据在改造前即写定，避免"看到数字再编解释"。
+
+---
+
 
 ## 一、问题
 
@@ -203,9 +259,9 @@ llama-bench -m ~/cie/models/Qwen3.5-2B-Q4_0-self.gguf -t 4 -p 64,512 -n 128 -fa 
 
 拿到 0.1.1 源码后，之前"能改的慢、快的不能改"的死结**部分解开**了：
 
-- 有源码 ✅
-- 能交叉编译（不需要 SPERT）✅
-- 编译产物性能应与 apt 包一致（同一 commit 17ce6aa）✅
+- 有源码：是
+- 能交叉编译（不需要 SPERT）：是
+- 编译产物性能应与 apt 包一致（同一 commit 17ce6aa）：是
 
 **但 GDN 快照仍然不建议做**，原因变成纯粹的工作量问题：改状态管理约需 3~5 天，而距提交只剩 7 天，且需要多轮测试支撑（而我们的多轮实验本身还没跑通）。**障碍从"技术上不可能"变成"时间上不划算"——这个变化要如实写进报告。**
 
@@ -286,7 +342,7 @@ sudo udevadm control --reload-rules && sudo udevadm trigger
 CPU_RISCV64_SPACEMIT: tcm is available, blk_size: 131072, blk_num: 4, is_fake_tcm: 0
 ```
 
-- `tcm is available` ✅
+- 启动日志出现 `tcm is available`（已确认）
 - `131072 × 4 = 512 KB` 全部分配
 - `is_fake_tcm: 0` —— **真实片上 TCM，非模拟**
 - `falling back to heap` 彻底消失
