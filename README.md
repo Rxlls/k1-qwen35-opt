@@ -44,6 +44,7 @@
 │   ├── REPORT.md            技术文档（优化策略、测试报告、完整数据）
 │   ├── PATCH_TCM.md         TCM 设备路径修复的完整记录
 │   ├── DEFENSE.md           答辩提纲
+│   ├── PLANNING.md          启动阶段计划（保留以记录判断与修正）
 │   └── VERSIONS.md          环境与产物版本档案
 ├── scripts/                 全流程脚本（按序号执行）
 │   ├── 00_fetch_models.sh   下载官方原始权重（x86）
@@ -63,8 +64,13 @@
 │   └── ...
 ├── configs/                 推荐参数与实测基线
 ├── patches/                 框架改造补丁
-└── results/                 全部原始测量数据与评审记录
+├── results/                 全部原始测量数据与评审记录
+├── vendor/                  第三方预编译依赖（spine-runtime，仅 v0.2.3 构建用）
+├── LICENSE                  MIT
+└── README.md
 ```
+
+> 赛题原文（主办方文件）不随仓库分发；构建产物与模型权重大于仓库容量上限，均由脚本重新生成。
 
 ## 快速开始
 

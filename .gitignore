@@ -49,3 +49,11 @@ desktop.ini
 *.bak
 tmp/
 temp/
+
+# 赛题原文（主办方文件，不随仓库分发）
+RISC-V K1 边缘大模型推理优化赛题说明.md
+
+# 本地镜像与构建产物
+Bianbu-LXQt-K1-*.zip
+llama023-riscv64.tar.gz
+llama011-patched.tar.gz
