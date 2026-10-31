@@ -1,5 +1,9 @@
 # 基于K1 AI CPU的Qwen3.5本地部署与性能优化——实施计划与前置需求清单
 
+> **文档性质**：项目启动阶段（2026-10-28）的原始计划，保留以记录当时的判断与后续修正。
+> 其中部分结论已被实测推翻（例如「升级运行时能大幅提速」「TCM 未生效是主因」），
+> 最新结论请以 [`PROPOSAL.md`](PROPOSAL.md) 与 [`REPORT.md`](REPORT.md) 为准。
+>
 > 适用赛题：《RISC-V K1 边缘大模型推理优化赛题说明》  
 > 目标平台：进迭时空K1笔记本（8核X60，8GB LPDDR4x，Bianbu OS）  
 > 目标模型：Qwen3.5-2B-Instruct、Qwen3.5-4B-Instruct  
