@@ -94,8 +94,14 @@ check_env() {
 
   if [ -e /dev/tcm ]; then
     ok "TCM 设备节点存在 (/dev/tcm) $(ls -l /dev/tcm | awk '{print $1}')"
-    if [ ! -r /dev/tcm ] || [ ! -w /dev/tcm ]; then
-      warn "当前用户无 /dev/tcm 读写权限，TCM 会报 errno=13 → sudo chmod 666 /dev/tcm（udev 持久化见 docs/PATCH_TCM.md）"
+    if [ -r /dev/tcm ] && [ -w /dev/tcm ]; then
+      warn "/dev/tcm 已对外开放。apt 原版 0.1.1 在此状态下 prefill 会下降约 38%（半可用状态）"
+      warn "建议恢复出厂权限：sudo chmod 600 /dev/tcm  （详见 docs/DEPLOY.md §5.3）"
+    else
+      ok "/dev/tcm 为默认 600 —— 原版 0.1.1 将回退纯堆内存，这是预期且最快的行为，请勿 chmod"
+    fi
+    if fuser /dev/tcm >/dev/null 2>&1; then
+      warn "/dev/tcm 正被其它进程占用（TCM 为独占资源），会拖慢当前测量：fuser -v /dev/tcm"
     fi
   else
     warn "无 /dev/tcm，TCM 加速不可用"

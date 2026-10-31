@@ -285,14 +285,40 @@ ggml/src/ggml-cpu/spacemit/ime.cpp:1704:
 
 **影响**：TCM 退回堆内存，`use_ime2` 无法启用。实测**对吞吐无显著影响**（详见 `PATCH_TCM.md` §10.5），可忽略；若要修，打 `patches/0001-tcm-dev-path.patch` 并重新交叉编译。
 
-### 5.3 `open(/dev/tcm) failed, errno=13`
+### 5.3 `open(/dev/tcm) failed, errno=13` 与「不要随意放开 TCM 权限」
 
-**原因**：`/dev/tcm` 权限为 `crw------- root:root`。
+**现象**：`/dev/tcm` 权限为 `crw------- root:root`，普通用户打不开，报 `errno=13`（EACCES）。
+
+**先别急着 chmod。** 实测（2B，同一二进制 0.1.1，`-t 4 -p 512 -n 64 -fa 1`）：
+
+| `/dev/tcm` 权限 | 运行时 | pp512 | 说明 |
+|---|---|---|---|
+| `600`（出厂默认） | apt 原版 0.1.1 | **20.36** | 打不开 → 纯堆内存 → **最快** |
+| `666`（放开） | apt 原版 0.1.1 | **12.72** | 能打开但拿不到同步块 → **慢 38%** |
+| `666` | 打了 TCM patch 的 0.1.1 | **20.36** | 完整 TCM，与堆内存持平 |
+
+**机制**：未打补丁的 0.1.1 只认 `/dev/tcm_sync_mem`。权限放开后，它**能**打开 `/dev/tcm` 并打印
+`tcm is available, blk_size: 131072, blk_num: 4, is_fake_tcm: 0`，但取不到同步块，仍打印
+`alloc_chunk: open(/dev/tcm_sync_mem) failed` 并 `falling back to heap`。
+这个"**半可用**"状态反而比"完全不可用"慢得多——TCM 被映射了却无法同步，形成额外的串行开销。
+
+**结论**：
+
+- 使用 **apt 原版 0.1.1**（本项目基线）：保持 `/dev/tcm` 为 `600`，**不要 chmod**。
+  `falling back to heap` 是预期且最优的行为，`errno=13` 也不会出现（因为它根本不打开 `/dev/tcm`）。
+- 使用 **打了 TCM patch 的版本**：才需要 `sudo chmod 666 /dev/tcm`（重启失效）或 udev 规则持久化：
+
+  ```bash
+  echo 'KERNEL=="tcm", MODE="0666"' | sudo tee /etc/udev/rules.d/99-tcm.rules
+  sudo udevadm control --reload-rules && sudo udevadm trigger
+  ```
+
+**另一个坑：TCM 是独占资源。** 一个进程（哪怕卡死的）持有 `/dev/tcm` 时，后续进程拿不到，性能同样退化。
+基准测试前确认无残留：
 
 ```bash
-sudo chmod 666 /dev/tcm                     # 临时，重启失效
-echo 'KERNEL=="tcm", MODE="0666"' | sudo tee /etc/udev/rules.d/99-tcm.rules   # 持久化
-sudo udevadm control --reload-rules && sudo udevadm trigger
+fuser /dev/tcm          # 有输出说明被占用
+pkill -9 -f "llama[-]bench"   # 注意方括号：避免 pkill 匹配到自己
 ```
 
 ### 5.4 转换/加载阶段的四类报错
