@@ -163,8 +163,14 @@ file "$BIN" | sed 's/^/    /'
 
 echo
 echo "=========================================================="
-echo " 完成。下一步："
+echo " 完成。产物: $BIN"
+echo
+echo " 下一步（量化器路径与本脚本产物一致时，可直接调用）："
 echo "   bash scripts/03_quantize.sh <f16-nomtp.gguf> Q4_0"
+echo
+echo " 若 03 找不到量化器（例如本次以 CIE_HOME=$CIE 构建，而 03 在别的根目录运行），"
+echo " 用 QNT_BIN 显式指定："
+echo "   QNT_BIN=\"$BIN\" bash scripts/03_quantize.sh <f16-nomtp.gguf> Q4_0"
 echo
 echo " 校验产物（必须是全 Q4_0、block_count=24/32、nextn=0）："
 echo "   python3 tools/gguf_types.py <产物.gguf>"
