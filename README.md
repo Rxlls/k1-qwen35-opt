@@ -40,8 +40,8 @@
 ```
 .
 ├── docs/
-│   ├── PROPOSAL.md          方案书（含开发计划、预期成果、应用价值）
-│   ├── REPORT.md            技术文档（优化策略、测试报告、完整数据）
+│   ├── 方案书.md            方案书（含开发计划、预期成果、应用价值）
+│   ├── 技术文档.md          技术文档（优化策略、测试报告、完整数据）
 │   ├── DEPLOY.md            模型转换与部署说明（含故障排查手册）
 │   ├── PATCH_TCM.md         框架改造设计说明 + 实施与验证记录
 │   ├── DEFENSE.md           答辩提纲
@@ -149,11 +149,13 @@ bash tools/bench_quick.sh Qwen3.5-2B-Q4_0-self.gguf 2b_q4self
 
 | 文档 | 内容 |
 |---|---|
-| [docs/PROPOSAL.md](docs/PROPOSAL.md) | 方案书：背景、技术路线、开发计划、预期成果、应用价值 |
-| [docs/REPORT.md](docs/REPORT.md) | 技术文档：完整优化策略、测试方法、全部数据 |
-| [docs/PATCH_TCM.md](docs/PATCH_TCM.md) | TCM 设备路径修复：诊断、patch、编译、上板验证全记录 |
+| [docs/方案书.md](docs/方案书.md) | 方案书：背景、技术路线、开发计划、预期成果、应用价值 |
+| [docs/技术文档.md](docs/技术文档.md) | 技术文档：完整优化策略、测试方法、全部数据 |
+| [docs/DEPLOY.md](docs/DEPLOY.md) | 模型转换与部署说明：环境准备、五步转换、参数速查、故障排查手册 |
+| [docs/PATCH_TCM.md](docs/PATCH_TCM.md) | 框架改造设计说明（§0）+ 诊断、patch、编译、上板验证全记录 |
 | [docs/VERSIONS.md](docs/VERSIONS.md) | 环境版本、产物 sha256、镜像校验值 |
 | [docs/DEFENSE.md](docs/DEFENSE.md) | 答辩提纲与预设问答 |
+| [docs/PLANNING.md](docs/PLANNING.md) | 启动阶段计划（保留以记录当时的判断与修正） |
 
 ## 未包含在仓库中的内容
 

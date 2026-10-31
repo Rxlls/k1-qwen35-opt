@@ -74,7 +74,7 @@ def fit_table_to_window(table):
 
 
 def main():
-    src = sys.argv[1] if len(sys.argv) > 1 else "docs/REPORT_formatted.docx"
+    src = sys.argv[1] if len(sys.argv) > 1 else "docs/技术文档.docx"
     dst = sys.argv[2] if len(sys.argv) > 2 else src
 
     doc = docx.Document(src)
