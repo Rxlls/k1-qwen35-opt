@@ -234,6 +234,8 @@ Qwen3.5 的 24 层中有 18 层为 Gated DeltaNet，其循环状态无法像 KV 
 | `docs/PATCH_TCM.md` | TCM 设备路径修复全记录：诊断、patch、交叉编译、上板验证 |
 | `docs/VERSIONS.md` | 环境版本、镜像与产物 sha256 校验值 |
 | `docs/DEFENSE.md` | 答辩提纲与预设问答 |
+| `docs/PLANNING.md` | 启动阶段计划（保留以记录当时的判断与后续修正） |
+| `vendor/` | 第三方预编译依赖（spine-runtime，仅 v0.2.3 构建用，附来源与许可） |
 | `results/` | 全部原始测量数据（bench 输出、频率温度采样、质量盲评原始记录） |
 
 ### 附录 C：关键数据速查
