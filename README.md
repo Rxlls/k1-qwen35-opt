@@ -42,7 +42,8 @@
 ├── docs/
 │   ├── PROPOSAL.md          方案书（含开发计划、预期成果、应用价值）
 │   ├── REPORT.md            技术文档（优化策略、测试报告、完整数据）
-│   ├── PATCH_TCM.md         TCM 设备路径修复的完整记录
+│   ├── DEPLOY.md            模型转换与部署说明（含故障排查手册）
+│   ├── PATCH_TCM.md         框架改造设计说明 + 实施与验证记录
 │   ├── DEFENSE.md           答辩提纲
 │   ├── PLANNING.md          启动阶段计划（保留以记录判断与修正）
 │   └── VERSIONS.md          环境与产物版本档案
@@ -51,12 +52,13 @@
 │   ├── 01_convert.sh        HF → f16 GGUF
 │   ├── 02_strip_mtp.sh      剥离 MTP 层 + 修正 3 个元数据键
 │   ├── 03_quantize.sh       f16 → Q4_0 / Q4_K_M
-│   ├── deploy.sh            K1 一键部署验证
-│   ├── build_patched_011.sh 交叉编译带 TCM 修复的 0.1.1
-│   └── bench_quick.sh       标准基准封装
+│   ├── 04_build_quantizer.sh 构建 v0.2.3 量化器（03 的前置）
+│   ├── deploy.sh            K1 一键部署验证（all/full/check/deps/models/smoke）
+│   └── build_patched_011.sh 交叉编译带 TCM 修复的 0.1.1
 ├── tools/
 │   ├── collect_env.sh       环境快照 + TCM 诊断
 │   ├── monitor.sh           频率/温度/内存 1Hz 采样
+│   ├── bench_quick.sh       标准基准封装（口径固化）
 │   ├── strip_mtp.py         MTP 剥离核心实现
 │   ├── gguf_types.py        极简 GGUF 解析器（秒级读张量类型）
 │   ├── quality_v2.sh        质量测试（关闭思考模式）
@@ -91,17 +93,25 @@ bash scripts/00_fetch_models.sh 2b
 # 2. 转换为 f16 GGUF
 bash scripts/01_convert.sh 2b
 
-# 3. 剥离 MTP 层（0.1.1 不支持 MTP，必须做）
+# 3. 剥离 MTP 层（运行时不支持 MTP，必须做）
 bash scripts/02_strip_mtp.sh
 
-# 4. 量化（必须使用 v0.2.3 编译的 llama-quantize）
-bash scripts/03_quantize.sh <上一步产物> Q4_0
+# 4. 构建量化器（v0.2.3；apt 的 0.1.1 无法处理 16 列小张量）
+bash scripts/04_build_quantizer.sh
 
-# 5. 拷贝到 K1 后跑基准
-bash tools/bench_quick.sh Qwen3.5-2B-Q4_0.gguf my_tag
+# 5. 量化
+bash scripts/03_quantize.sh gguf/Qwen3.5-2B-f16-nomtp.gguf Q4_0
+
+# 6. 校验产物（block_count=24 / nextn=0 / 全 Q4_0，三项必须同时满足）
+python3 tools/gguf_types.py gguf/Qwen3.5-2B-Q4_0.gguf
+
+# 7. 拷到 K1 → 一键部署验证 → 跑基准
+scp gguf/Qwen3.5-2B-Q4_0.gguf <K1>:~/cie/models/
+bash ~/cie/tools/deploy.sh full
+bash ~/cie/tools/bench_quick.sh Qwen3.5-2B-Q4_0.gguf my_tag
 ```
 
-详细步骤与踩坑记录见 `docs/REPORT.md` 附录 A。
+逐步说明、参数含义与**故障排查手册**见 [`docs/DEPLOY.md`](docs/DEPLOY.md)。
 
 ### 一键基准（K1，已有模型时）
 
@@ -130,10 +140,10 @@ bash tools/bench_quick.sh Qwen3.5-2B-Q4_0-self.gguf 2b_q4self
 
 | 约束 | 说明 |
 |---|---|
-| 线程数必须为 4 | `-t 8` 会使 decode 从 2.84 降至 0.86（-70%），prefill 不受影响 |
+| **线程数必须显式设为 4** | 不只是变慢：`llama-cli` 用默认 8 线程会直接 abort（`ime.cpp:1704: thread_n N exceeds perfer_core_ids size 4`，core dump）；`llama-bench -t 8` 则只是 decode 掉 70% |
 | 仅用 Q4_0 | Q4_K_M 的 prefill 只有 Q4_0 的 52%；Q5_K / Q3_K_M / KV q8_0 不在白名单 |
 | 长 prompt 首字延迟高 | 1200 token 需约 62 秒，长文档问答不可用 |
-| 量化器需 v0.2.3 | 0.1.1 无法处理 16 列小张量（`ssm_alpha`），报 `ncols not divisible by 32` |
+| 量化器需 v0.2.3 | 0.1.1 无法处理 16 列小张量（`ssm_alpha`），报 `ncols not divisible by 32`；用 `scripts/04_build_quantizer.sh` 构建 |
 
 ## 文档索引
 

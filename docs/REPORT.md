@@ -341,6 +341,30 @@ Q4_0 = 1.2026GB×2.84 = 3.42GB/s；Q4_K_M = 1.3851GB×2.56 = **3.55GB/s**。
 
 ⇒ 官方"K1≤4线程"不是保守，是硬约束；崩的是TCM/IME同步路径（prefill不受影响）。**"线程越多越快"在此平台不成立。**
 
+**补充实测（2026-11-01，部署脚本验证时发现）：在推理路径上，超线程不是"变慢"而是"直接崩溃"。**
+
+`llama-cli` 使用 8 线程时并非减速，而是断言失败并核心转储：
+
+```
+ggml/src/ggml-cpu/spacemit/ime.cpp:1704:
+  thread_n 7 exceeds perfer_core_ids size 4
+（core dumped）
+```
+
+根因：spacemit 后端只为 Cluster 0 登记了 4 个 preferred core（`num_perfer_cores=4`），
+`set_numa_thread_affinity()` 对 `thread_id ≥ 4` 直接 `ggml_abort`。而 `llama-cli` 的默认
+线程数取 `hardware_concurrency()`（本机为 8），**因此不显式传 `-t 4` 就会崩溃**。
+
+两条执行路径表现不同，但结论一致：
+
+| 路径 | `-t 8` 的表现 | 原因 |
+|---|---|---|
+| `llama-bench` | 可运行，decode 掉 70% | bench 不走 NUMA 绑核路径 |
+| `llama-cli` / `llama-server` | **abort + core dump** | 触发 `ime.cpp:1704` 断言 |
+
+⇒ **K1 上线程数不仅"必须是 4"，而且"必须显式指定"**。这一点已固化进 `scripts/deploy.sh`
+的冒烟测试（`-t 4` 硬编码）与 `configs/tuned_*.yaml`。
+
 ### 8.4 量化类型与 IME 白名单：实测边界
 
 官方文档列出 5 种受 IME 加速的量化类型（`Q4_K_M`、`Q4_0`、`Q4_1`、`Q2_K`、`Q3_K`）。为验证其边界，对 4B 模型生成多种格式并在同一口径下测试：
@@ -710,7 +734,9 @@ constexpr char SPINE_MEM_POOL_TCM_SYNC_MEM_DEV[] = "/dev/tcm_sync_mem";
 ```
 CIE/                                  # 代码与文档仓库（git 管理）
 ├── docs/
-│   ├── REPORT.md                     本报告
+│   ├── REPORT.md                     本报告（技术文档）
+│   ├── DEPLOY.md                     模型转换与部署说明（含故障排查手册）
+│   ├── PATCH_TCM.md                  框架改造设计说明 + 实施验证记录
 │   ├── VERSIONS.md                   版本固化与环境档案
 │   └── DEFENSE.md                    答辩提纲
 ├── scripts/                          全流程可执行脚本（按序号执行）
@@ -718,8 +744,9 @@ CIE/                                  # 代码与文档仓库（git 管理）
 │   ├── 01_convert.sh                 HF → f16 GGUF（x86，需 ≥16GB 内存）
 │   ├── 02_strip_mtp.sh               剥离 MTP 层 + 修正 3 个元数据键
 │   ├── 03_quantize.sh                f16 → Q4_0 / Q4_K_M（须用 v0.2.3 量化器）
-│   ├── deploy.sh                     K1 一键部署验证（check/deps/models/smoke）
-│   └── bench_quick.sh                标准基准封装
+│   ├── 04_build_quantizer.sh         构建 v0.2.3 量化器（03 的前置依赖）
+│   ├── deploy.sh                     K1 一键部署验证（all/full/check/deps/models/smoke）
+│   └── build_patched_011.sh          交叉编译带 TCM 修复的 0.1.1
 ├── tools/
 │   ├── collect_env.sh                环境快照 + TCM 诊断
 │   ├── monitor.sh                    频率/温度/内存 1Hz 采样
@@ -763,27 +790,34 @@ CIE/                                  # 代码与文档仓库（git 管理）
 
 ## 附录A：复现步骤
 
+> 完整版（含环境准备、参数含义、故障排查手册）见 [`DEPLOY.md`](DEPLOY.md)。以下为最小命令序列。
+
 ```bash
-# ── 1. 环境（K1，Bianbu 2.3.5 LXQt / kernel 6.6.63）──
+# ── 0. 依赖（K1，Bianbu 2.3.5 LXQt / kernel 6.6.63）──
 sudo apt update && sudo apt install -y llama.cpp-tools-spacemit spacemit-tcm
 bash tools/collect_env.sh          # 环境快照 + TCM 诊断，isa 必须含 v 与 ime
 
-# ── 2. 转换（x86，需 ≥16GB 内存；4B 的 f16 权重 8.4GB）──
-python convert_hf_to_gguf.py <HF权重目录> --outfile model-f16.gguf --outtype f16
-python tools/strip_mtp.py model-f16.gguf model-f16-nomtp.gguf    # 必须：0.1.1 不支持 MTP
-# 量化器须用 v0.2.3 编译出的 llama-quantize（0.1.1 版报 ncols 16 not divisible by 32）
-$HOME/cie/src/llama023/bin/llama-quantize --token-embedding-type q8_0 \
-    model-f16-nomtp.gguf model-Q4_0.gguf Q4_0
+# ── 1. 下载官方权重（x86，需 ≥16GB 内存；4B 的 f16 权重 8.4GB）──
+bash scripts/00_fetch_models.sh 2b
+bash scripts/01_convert.sh 2b                                   # → gguf/*-f16.gguf
+python tools/strip_mtp.py gguf/Qwen3.5-2B-f16.gguf gguf/Qwen3.5-2B-f16-nomtp.gguf
+
+# ── 2. 量化器（04 必须先于 03：apt 的 0.1.1 无法处理 16 列小张量）──
+bash scripts/04_build_quantizer.sh                              # → src/llama023/bin/llama-quantize
+bash scripts/03_quantize.sh gguf/Qwen3.5-2B-f16-nomtp.gguf Q4_0
 
 # ── 3. 校验（关键：任何一步不符即中止，否则错误会传到最终结果）──
-python tools/gguf_types.py model-Q4_0.gguf    # 确认 block_count=24/32、nextn=0、全 Q4_0
-sha256sum model-Q4_0.gguf >> docs/hashes.txt
+python tools/gguf_types.py gguf/Qwen3.5-2B-Q4_0.gguf   # block_count=24 / nextn=0 / 全 Q4_0
+sha256sum gguf/Qwen3.5-2B-Q4_0.gguf >> docs/hashes.txt
 
-# ── 4. 基准（K1）──
+# ── 4. 部署与基准（K1）──
+bash tools/deploy.sh full                        # 依赖 → 环境 → 模型 → 冒烟
 bash tools/monitor.sh &                          # 频率/温度/内存 1Hz 采样
-bash tools/bench_quick.sh model-Q4_0.gguf <tag>  # 口径 -t 4 -fa 1 -mmp 0 -r 3
+bash tools/bench_quick.sh Qwen3.5-2B-Q4_0.gguf <tag>   # 口径 -t 4 -fa 1 -mmp 0 -r 3
 kill %1
 ```
+
+> 冒烟与推理命令必须带 `-t 4`：默认 8 线程会触发 `ime.cpp:1704` 断言并 core dump（§8.3）。
 
 ## 附录B：原始数据索引
 

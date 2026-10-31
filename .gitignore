@@ -63,3 +63,6 @@ llama011-patched.tar.gz
 
 # 本地排版中间产物
 *.bak.docx
+
+# Word 占用时另存的待替换版本
+docs/*.new.docx
