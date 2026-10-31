@@ -2,7 +2,7 @@
 
 > 适用对象：需要在进迭时空 K1（RISC-V，8 GB）上复现本项目的人类或自动化流程。
 > 目标：从**官方原始权重**出发，自行产出量化 GGUF，并部署为可用的本地推理服务。
-> 配套文档：优化策略与全部测试数据见 [`REPORT.md`](REPORT.md)；TCM 改造见 [`PATCH_TCM.md`](PATCH_TCM.md)；版本与校验值见 [`VERSIONS.md`](VERSIONS.md)。
+> 配套文档：优化策略与全部测试数据见 [`技术文档.md`](技术文档.md)；TCM 改造见 [`PATCH_TCM.md`](PATCH_TCM.md)；版本与校验值见 [`VERSIONS.md`](VERSIONS.md)。
 
 ---
 
@@ -48,7 +48,7 @@ sudo apt update
 sudo apt install -y llama.cpp-tools-spacemit spacemit-tcm
 ```
 
-> **不要更换系统**。`llama.cpp-tools-spacemit` / `spacemit-tcm` 只存在于 Bianbu 的 apt 源；换成通用 Ubuntu 会同时失去 IME 加速路径与 K1 的 cpufreq/thermal 内核补丁，性能与稳定性都不可控（详见 `REPORT.md` §2.3）。
+> **不要更换系统**。`llama.cpp-tools-spacemit` / `spacemit-tcm` 只存在于 Bianbu 的 apt 源；换成通用 Ubuntu 会同时失去 IME 加速路径与 K1 的 cpufreq/thermal 内核补丁，性能与稳定性都不可控（详见 `技术文档.md` §2.3）。
 
 ### 1.2 x86 侧
 

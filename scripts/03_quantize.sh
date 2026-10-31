@@ -83,4 +83,4 @@ echo
 echo "== 下一步 =="
 echo "  拷贝到 K1 的 \$CIE/models/，然后:"
 echo "    bash tools/bench_quick.sh \$(basename 产物.gguf) <tag>"
-echo "    sha256sum 产物.gguf   # 记入 docs/REPORT.md §5.3"
+echo "    sha256sum 产物.gguf   # 记入 docs/技术文档.md §5.3"

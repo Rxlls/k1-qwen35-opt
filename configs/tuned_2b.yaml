@@ -1,5 +1,5 @@
 # K1 上 Qwen3.5-2B 的推荐运行参数
-# 依据：docs/REPORT.md §5.4 / §8.3 / §9.1 的实测结果
+# 依据：docs/技术文档.md §5.4 / §8.3 / §9.1 的实测结果
 
 model: Qwen3.5-2B-Q4_0-self.gguf
 runtime: "llama.cpp 0.1.1 (apt, legacy IME1 backend)"
