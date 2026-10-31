@@ -1,0 +1,13 @@
+diff --git a/ggml/src/ggml-cpu/spacemit/spine_mem_pool.cpp b/ggml/src/ggml-cpu/spacemit/spine_mem_pool.cpp
+index 1409423..97386ee 100644
+--- a/ggml/src/ggml-cpu/spacemit/spine_mem_pool.cpp
++++ b/ggml/src/ggml-cpu/spacemit/spine_mem_pool.cpp
+@@ -27,7 +27,7 @@ constexpr size_t   SPINE_SHARE_MEM_POOL_CHUNK_SIZE   = 512ull * 1024ull;
+ constexpr size_t   SPINE_MEM_POOL_1G_REGION_SIZE     = 1ull << 30;
+ constexpr uint64_t HUGETLB_1G_FLAG_REQUIRE_PUD       = 1ull << 0;
+ constexpr char     SPINE_MEM_POOL_HUGETLB_1G_DEV[]   = "/dev/hugetlb_1g";
+-constexpr char     SPINE_MEM_POOL_TCM_SYNC_MEM_DEV[] = "/dev/tcm_sync_mem";
++constexpr char     SPINE_MEM_POOL_TCM_SYNC_MEM_DEV[] = "/dev/tcm";
+ 
+ struct hugetlb_1g_region {
+     uint64_t size{ 0 };
