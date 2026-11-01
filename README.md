@@ -157,6 +157,9 @@ bash tools/bench_quick.sh Qwen3.5-2B-Q4_0-self.gguf 2b_q4self
 | [docs/技术文档.md](docs/技术文档.md) | 技术文档：完整优化策略、测试方法、全部数据 |
 | [docs/DEPLOY.md](docs/DEPLOY.md) | 模型转换与部署说明：环境准备、五步转换、参数速查、故障排查手册 |
 | [docs/PATCH_TCM.md](docs/PATCH_TCM.md) | 框架改造设计说明（§0）+ 诊断、patch、编译、上板验证全记录 |
+| [docs/VERIFY.md](docs/VERIFY.md) | **验收指南**：五个维度怎么查、判断标准、常见故障、验收顺序与通过线 |
+| [docs/AUDIT.md](docs/AUDIT.md) | 数据核对报告：哪些数字有归档、哪些已撤回、还剩什么没闭环 |
+| [docs/DEMO_SHOTS.md](docs/DEMO_SHOTS.md) | 演示图说明：实机截屏与整理图的区分、每张图该出现的数字 |
 | [docs/VERSIONS.md](docs/VERSIONS.md) | 环境版本、产物 sha256、镜像校验值 |
 | [docs/DEFENSE.md](docs/DEFENSE.md) | 答辩提纲与预设问答 |
 | [docs/PLANNING.md](docs/PLANNING.md) | 启动阶段计划（保留以记录当时的判断与修正） |
