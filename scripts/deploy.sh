@@ -200,7 +200,11 @@ rc_desc() {
 run_smoke() {
   local bin="$1" model="$2" extra="$3"
   echo "  运行: $(basename "$bin") -m $(basename "$model") -p 你好 -n 8 ${extra}"
-  SMOKE_OUT=$(timeout 180 "$bin" -m "$model" -p "你好" -n 8 ${extra} 2>&1); SMOKE_RC=$?
+  # setsid：脱离控制终端。llama.cpp 的 console 在存在 /dev/tty 时会直接写 tty，
+  #   绕过 $(...) 的管道 → 捕获为空 → 明明出字却被判失败（rc 仍是 0）。
+  # </dev/null：避免 stdin 是终端时等待输入。
+  local pre=""; command -v setsid >/dev/null 2>&1 && pre="setsid"
+  SMOKE_OUT=$(timeout 180 $pre "$bin" -m "$model" -p "你好" -n 8 ${extra} </dev/null 2>&1); SMOKE_RC=$?
   if echo "$SMOKE_OUT" | grep -qiE 'Generation:|Exiting'; then
     ok "推理正常出字（$(basename "$bin") ${extra}）"
     echo "$SMOKE_OUT" | grep -E 'Prompt:|Generation:' | tail -2 | sed 's/^/         /'
