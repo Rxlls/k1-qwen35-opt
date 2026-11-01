@@ -173,6 +173,44 @@ check_models() {
 }
 
 # ------------------------------------------------------------
+# 选 llama-cli：LLAMA_CLI 显式指定优先；否则优先 apt 原版（项目基线）；
+# 最后才退回 PATH 里的（可能是自建的 patched 版本）。
+pick_cli() {
+  local c
+  for c in "${LLAMA_CLI:-}" /usr/bin/llama-cli "$(command -v llama-cli 2>/dev/null)"; do
+    if [ -n "$c" ] && [ -x "$c" ]; then echo "$c"; return 0; fi
+  done
+  return 1
+}
+
+# 退出码翻译：timeout 透传子进程状态，128+N 即收到信号 N
+rc_desc() {
+  case "$1" in
+    0)   echo "正常" ;;
+    124) echo "超时（180s 内未出字）" ;;
+    132) echo "SIGILL 非法指令" ;;
+    134) echo "SIGABRT 断言失败（线程数超 perfer_core_ids 最常见）" ;;
+    135) echo "SIGBUS 总线错误（mmap／大页异常）" ;;
+    139) echo "SIGSEGV 段错误（多为动态库版本混用）" ;;
+    *)   echo "退出码 $1" ;;
+  esac
+}
+
+# 跑一次冒烟；成功返回 0，同时把输出与退出码留在 SMOKE_OUT / SMOKE_RC
+run_smoke() {
+  local bin="$1" model="$2" extra="$3"
+  echo "  运行: $(basename "$bin") -m $(basename "$model") -p 你好 -n 8 ${extra}"
+  SMOKE_OUT=$(timeout 180 "$bin" -m "$model" -p "你好" -n 8 ${extra} 2>&1); SMOKE_RC=$?
+  if echo "$SMOKE_OUT" | grep -qiE 'Generation:|Exiting'; then
+    ok "推理正常出字（$(basename "$bin") ${extra}）"
+    echo "$SMOKE_OUT" | grep -E 'Prompt:|Generation:' | tail -2 | sed 's/^/         /'
+    return 0
+  fi
+  echo "  [FAIL] $(rc_desc "$SMOKE_RC")"
+  echo "$SMOKE_OUT" | tail -6 | sed 's/^/         /'
+  return 1
+}
+
 smoke_test() {
   sec "冒烟测试（生成 8 token）"
   local m; m=$(resolve_model "$MODEL_2B" "Qwen3.5-2B-*.gguf")
@@ -181,18 +219,40 @@ smoke_test() {
   # -t 4 是硬性要求：0.1.1 的 spacemit 后端在 ime.cpp:1704 断言
   #   thread_n N exceeds perfer_core_ids size 4
   # 默认线程数=8 会直接 abort（core dump），不是变慢。详见 docs/DEPLOY.md §5。
-  echo "  运行: llama-cli -m $(basename "$m") -p 你好 -n 8 -c 2048 -t 4 -st --no-mmap"
-  local out
-  out=$(timeout 180 llama-cli -m "$m" -p "你好" -n 8 -c 2048 -t 4 -st --no-mmap 2>&1)
-  if echo "$out" | grep -qiE 'Generation:|Exiting'; then
-    ok "推理正常出字"
-    echo "$out" | grep -E 'Prompt:|Generation:' | tail -2 | sed 's/^/         /'
-  else
-    bad "推理失败，末尾输出："
-    echo "$out" | tail -8 | sed 's/^/         /'
-    echo "         常见原因：未用 -t 4（默认 8 线程会 abort）／模型文件不完整／TCM 权限"
+  local cli; cli=$(pick_cli) || { bad "找不到 llama-cli（PATH 与 /usr/bin 均无）"; return 1; }
+  echo "  二进制: $cli"
+
+  # 自建产物没设 rpath 时会静默加载系统旧库：把真正生效的库打出来
+  local libs
+  libs=$(ldd "$cli" 2>/dev/null | awk '/libllama|libggml/{print $3}' \
+         | xargs -r -n1 basename 2>/dev/null | paste -sd' ' -)
+  [ -n "$libs" ] && echo "  动态库: $libs"
+  if [ -d "$CIE/src/llama011/lib" ]; then
+    echo "  注意: 存在自建产物 $CIE/src/llama011/lib；用它须先 export LD_LIBRARY_PATH"
+    echo "        否则跑的仍是系统库（日志会继续报 /dev/tcm_sync_mem）"
+  fi
+
+  local ok_try=0
+  run_smoke "$cli" "$m" "-c 2048 -t 4 -st --no-mmap" && ok_try=1
+
+  if [ $ok_try -eq 0 ]; then
+    warn "第一次失败（$(rc_desc "$SMOKE_RC")），改 mmap 模式重试"
+    run_smoke "$cli" "$m" "-c 2048 -t 4 -st" && ok_try=1
+  fi
+
+  if [ $ok_try -eq 0 ] && [ "$cli" != "/usr/bin/llama-cli" ] && [ -x /usr/bin/llama-cli ]; then
+    warn "仍失败，换 apt 原版 /usr/bin/llama-cli 重试（项目基线版本）"
+    run_smoke /usr/bin/llama-cli "$m" "-c 2048 -t 4 -st --no-mmap" && ok_try=1
+  fi
+
+  if [ $ok_try -eq 0 ]; then
+    bad "冒烟失败（3 种组合均未出字）"
+    echo "         定位命令：dmesg | tail -5   ／   free -m   ／   ldd $cli | grep -E 'llama|ggml'"
+    echo "         判读要点：apt 原版报 open(/dev/tcm_sync_mem) errno=2 后回退堆内存，"
+    echo "                   属预期且最快，不作为失败依据；errno=13 只会出现在打了 TCM patch 的版本上"
     return 1
   fi
+  return 0
 }
 
 # ------------------------------------------------------------
