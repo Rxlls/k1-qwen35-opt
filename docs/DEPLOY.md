@@ -420,6 +420,40 @@ LD_LIBRARY_PATH=$HOME/cie/src/llama011/lib \
 两条路径都能正常出字 → 若出现 core dump，问题在**当次 shell 的环境态**，与模型文件、TCM patch、`/dev/tcm` 权限均无关。
 换一个干净 shell（`env -u LD_LIBRARY_PATH bash ~/cie/tools/deploy.sh smoke`）即可验证。
 
+### 5.8 冒烟测试在桌面终端里"明明出字却判失败"
+
+**现象**：在桌面终端（qterminal / tmux）里跑 `deploy.sh`，冒烟环节屏幕上明明打印了
+`[ Prompt: 11.6 t/s | Generation: 3.1 t/s ]` 和 `Exiting...`，脚本却报
+`[FAIL] 正常` → `冒烟失败（3 种组合均未出字）`，最终 `通过 13 项，失败 1 项`；
+同一个脚本用 `ssh host 'bash deploy.sh'` 跑却是 14/14。
+
+**根因**：llama.cpp 的 console 在**存在控制终端**时会直接写 `/dev/tty`，
+绕过 `$(...)` 命令替换建立的管道。于是：
+
+- 屏幕上：输出正常（走的是 tty）
+- `SMOKE_OUT` 变量：空字符串
+- 判定：`grep -qiE 'Generation:|Exiting'` 不中 → 判失败，但退出码其实是 0
+
+所以日志里会出现自相矛盾的 `[FAIL] 正常`（"正常"是 `rc_desc 0` 的翻译）。
+
+**三种运行方式的结果**：
+
+| 运行方式 | 有无控制终端 | 冒烟判定 |
+|---|---|---|
+| 桌面终端 / tmux / 脚本内的 `$(...)` | 有 | 屏幕有字，变量为空 → **误判失败** |
+| `ssh host 'bash deploy.sh'` | 无 | 正常捕获 → 14/14 |
+| 桌面终端 + `setsid` | 无（已脱离） | 正常捕获 → 14/14 |
+
+**修复**（2026-11-01，`run_smoke` 内已加）：
+
+```bash
+local pre=""; command -v setsid >/dev/null 2>&1 && pre="setsid"
+SMOKE_OUT=$(timeout 180 $pre "$bin" ... </dev/null 2>&1)
+```
+
+`setsid` 让子进程脱离控制终端，`/dev/tty` 不可用后 console 回落到 stdout；`</dev/null` 顺手关掉 stdin。
+**凡是"在脚本里用 `$(...)` 包 llama-cli/llama-bench"的场合都应照此办理**，否则捕获会静默为空。
+
 ---
 
 ## 6. 复现性记录

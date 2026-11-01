@@ -21,6 +21,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "docs", "figs", "demo")
+RAW = os.path.join(OUT, "raw")
 
 # ---------------- 版式常量（逻辑像素，输出按 S 倍采样） ----------------
 S = 2
@@ -139,6 +140,24 @@ def wrap_px(text, font, maxw):
     return lines
 
 
+
+def autocrop_term(src, margin=28):
+    """裁掉终端里没有内容的空白行：从下往上找最后一行有亮像素的位置。"""
+    g = src.convert("L")
+    wx, wy = g.size
+    last = int(wy * 0.62)
+    px = g.load()
+    for y in range(min(wy - 30, 990), 55, -1):
+        hit = False
+        for x in range(30, wx - 30, 4):
+            if px[x, y] > 90:
+                hit = True
+                break
+        if hit:
+            last = y + margin
+            break
+    return src.crop((0, 0, wx, min(last, wy - 22)))
+
 def draw_card(d, card, x0, y0, x1, y1):
     r = 10 * S
     d.rounded_rectangle([x0, y0, x1, y1], radius=r, fill=C_CARD, outline=C_LINE, width=S)
@@ -182,7 +201,7 @@ def draw_card(d, card, x0, y0, x1, y1):
 def draw_takeaway(d, spec, x, right, near=None):
     text = spec.get("takeaway")
     if not text:
-        return
+        return None
     size = 13 * S
     f = F("cjk", size)
     lines = wrap_px(text, f, right - x - 18 * S)
@@ -194,6 +213,7 @@ def draw_takeaway(d, spec, x, right, near=None):
     for ln in lines:
         d.text((tx, y), ln, font=f, fill="#b8c4d6")
         y += 18 * S
+    return y
 
 # ---------------- 两种版式 ----------------
 def render_terminal(spec, path):
@@ -202,10 +222,15 @@ def render_terminal(spec, path):
 
     # 顶栏
     d.rectangle([0, 0, W, BAR_H * S], fill=C_BAR)
-    for i, col in enumerate(("#ff5f56", "#ffbd2e", "#27c93f")):
-        cx = (16 + i * 16) * S
-        d.ellipse([cx, 15 * S, cx + 10 * S, 25 * S], fill=col)
-    d.text((78 * S, 12 * S), spec["win"], font=F("cjk", 13 * S), fill="#a9b4c6")
+    if spec.get("chrome", True):
+        for i, col in enumerate(("#ff5f56", "#ffbd2e", "#27c93f")):
+            cx = (16 + i * 16) * S
+            d.ellipse([cx, 15 * S, cx + 10 * S, 25 * S], fill=col)
+        tx = 78 * S
+    else:
+        d.rectangle([18 * S, 13 * S, 21 * S, 27 * S], fill="#4fbf8b")
+        tx = 32 * S
+    d.text((tx, 12 * S), spec["win"], font=F("cjk", 13 * S), fill="#a9b4c6")
     d.text((W - PAD * S - F("cjk", 12 * S).getlength(spec["chip"]), 13 * S),
            spec["chip"], font=F("cjk", 12 * S), fill="#6f7c92")
     d.line([0, BAR_H * S, W, BAR_H * S], fill=C_LINE, width=S)
@@ -227,7 +252,7 @@ def render_terminal(spec, path):
     d.line([x, y, body_r * S, y], fill=C_LINE, width=S)
     y += 14 * S
 
-    for kind, text in spec["lines"]:
+    for kind, text in spec.get("lines", []):
         col, bold, is_prompt = KIND_STYLE.get(kind, (C_FG, False, False))
         if kind == "p":
             d.text((x, y), "$ ", font=F("mono", size), fill=C_GREEN)
@@ -240,16 +265,41 @@ def render_terminal(spec, path):
         draw_term_line(d, x, y, text, size, col, adv, bold)
         y += lh
 
-    draw_takeaway(d, spec, x, body_r * S)
+    shotfile = spec.get("shot")
+    if shotfile:
+        src = Image.open(shotfile).convert("RGB")
+        box = spec.get("shot_crop")
+        if box:
+            src = src.crop(box)
+        if spec.get("autocrop", True):
+            src = autocrop_term(src)
+        top = y
+        avail_w = (body_r - PAD) * S
+        avail_h = (H - FOOT_H - 58) * S - top
+        sc = min(avail_w / src.width, avail_h / src.height)
+        src = src.resize((int(src.width * sc), int(src.height * sc)), Image.LANCZOS)
+        d.rectangle([x - S, top - S, x + src.width + S, top + src.height + S], outline=C_LINE, width=S)
+        img.paste(src, (int(x), int(top)))
+        y = top + src.height
+
+    y_end = draw_takeaway(d, spec, x, body_r * S, near=(y if shotfile else None))
+
+    # 截图图按内容裁掉多余下边，避免大片空白
+    if shotfile and y_end:
+        need = int(y_end + 18 * S + FOOT_H * S)
+        if need < img.height:
+            img = img.crop((0, 0, img.width, need))
+            d = ImageDraw.Draw(img)
+    bottom = img.height
 
     if card:
-        draw_card(d, card, int(W * 0.715) * S, (BAR_H + 18) * S, (W - PAD) * S, (H - FOOT_H - 16) * S)
+        draw_card(d, card, int(W * 0.715) * S, (BAR_H + 18) * S, (W - PAD) * S, bottom - (FOOT_H + 16) * S)
 
     # 底栏
-    d.line([0, (H - FOOT_H) * S, W, (H - FOOT_H) * S], fill=C_LINE, width=S)
-    d.text((PAD * S, (H - FOOT_H + 11) * S), spec["source"], font=F("cjk", 11 * S), fill="#6d7a90")
+    d.line([0, bottom - FOOT_H * S, W * S, bottom - FOOT_H * S], fill=C_LINE, width=S)
+    d.text((PAD * S, bottom - FOOT_H * S + 11 * S), spec["source"], font=F("cjk", 11 * S), fill="#6d7a90")
     tag = "图 %s" % spec["no"]
-    d.text((W * S - PAD * S - F("cjkb", 11 * S).getlength(tag), (H - FOOT_H + 10) * S),
+    d.text((W * S - PAD * S - F("cjkb", 11 * S).getlength(tag), bottom - FOOT_H * S + 10 * S),
            tag, font=F("cjkb", 11 * S), fill="#8b97ab")
 
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -339,10 +389,15 @@ def render_table(spec, path):
     img = Image.new("RGB", (W * S, H * S), C_BG)
     d = ImageDraw.Draw(img)
     d.rectangle([0, 0, W, BAR_H * S], fill=C_BAR)
-    for i, col in enumerate(("#ff5f56", "#ffbd2e", "#27c93f")):
-        cx = (16 + i * 16) * S
-        d.ellipse([cx, 15 * S, cx + 10 * S, 25 * S], fill=col)
-    d.text((78 * S, 12 * S), spec["win"], font=F("cjk", 13 * S), fill="#a9b4c6")
+    if spec.get("chrome", True):
+        for i, col in enumerate(("#ff5f56", "#ffbd2e", "#27c93f")):
+            cx = (16 + i * 16) * S
+            d.ellipse([cx, 15 * S, cx + 10 * S, 25 * S], fill=col)
+        tx = 78 * S
+    else:
+        d.rectangle([18 * S, 13 * S, 21 * S, 27 * S], fill="#e8b33c")
+        tx = 32 * S
+    d.text((tx, 12 * S), spec["win"], font=F("cjk", 13 * S), fill="#a9b4c6")
     d.text((W - PAD * S - F("cjk", 12 * S).getlength(spec["chip"]), 13 * S),
            spec["chip"], font=F("cjk", 12 * S), fill="#6f7c92")
     d.line([0, BAR_H * S, W, BAR_H * S], fill=C_LINE, width=S)
@@ -402,31 +457,12 @@ def shot(**kw):
 
 # 图 1 —— 环境身份
 shot(
-    id="fig1", no="1 / 8", win=WIN, chip=CHIP,
+    id="fig1", chrome=False, win="实机截屏 · K1 桌面终端（grim / Wayland）", no="1 / 8", chip=CHIP,
     title="环境与硬件身份",
     sub="Bianbu 2.3.5 · Linux 6.6.63 · 8 × X60 @1.6 GHz",
-    source="数据来源：K1 实机执行 uname / nproc / free / os-release / df / /proc/cpuinfo（2026-11-01）",
-    lines=[
-        ("p", "uname -srm"),
-        ("o", "Linux 6.6.63 riscv64"),
-        ("p", "nproc"),
-        ("o", "8"),
-        ("p", "free -m | head -2"),
-        ("o", "               total        used        free      shared  buff/cache   available"),
-        ("o", "Mem:            7849         862        2864          48        4346        6986"),
-        ("p", "head -3 /etc/os-release"),
-        ("o", 'PRETTY_NAME="Bianbu 2.3.5"'),
-        ("o", 'NAME="Bianbu"'),
-        ("o", 'VERSION_ID="2.3.5"'),
-        ("p", "df -h / | tail -1"),
-        ("o", "/dev/nvme0n1p6  118G   48G   64G  44% /"),
-        ("p", "grep -m1 '^isa' /proc/cpuinfo"),
-        ("o", "isa  : rv64imafdcv_zicbom_zicboz_zicntr_zicond_zicsr_zifencei_zihintpause"),
-        ("o", "       _zihpm_zfh_zfhmin_zca_zcd_zba_zbb_zbc_zbs_zkt_zve32f_zve32x_zve64d"),
-        ("o", "       _zve64f_zve64x_zvfh_zvfhmin_zvkt_sscofpmf_sstc_svinval_svnapot"),
-        ("o", "       _svpbmt_**ime**"),
-        ("d", "       ↑ RVV（_v / _zve*）与 IME（_ime）同时在位，是后续加速的前提"),
-    ],
+    source="实机截屏（grim · Wayland）：K1 桌面终端 tmux 会话，2026-11-01 13:35；原始全屏见 raw/fig1_raw.png",
+    shot=os.path.join(RAW, "fig1_raw.png"),
+    shot_crop=(0, 0, 1920, 1012),
     card={
         "title": "关键指标",
         "items": [
@@ -441,36 +477,12 @@ shot(
 
 # 图 2 —— 一键部署自检
 shot(
-    id="fig2", no="2 / 8", win=WIN, chip=CHIP,
+    id="fig2", chrome=False, win="实机截屏 · K1 桌面终端（grim / Wayland）", no="2 / 8", chip=CHIP,
     title="一键部署自检",
     sub="bash ~/cie/tools/deploy.sh",
-    source="数据来源：K1 实机执行 deploy.sh 完整输出（2026-11-01 12:34）",
-    lines=[
-        ("p", "bash ~/cie/tools/deploy.sh"),
-        ("d", "=========================================================="),
-        ("d", " K1 Qwen3.5 推理优化 · 部署验证"),
-        ("d", " 时间: 2026-11-01 12:34:24   主机: aa"),
-        ("d", "=========================================================="),
-        ("t", "== 环境检查 =="),
-        ("ok", "  [OK]   架构 riscv64"),
-        ("ok", "  [OK]   RVV 向量扩展在位"),
-        ("ok", "  [OK]   IME AI 扩展在位（K1 独有）"),
-        ("ok", "  [OK]   内存 7849 MB"),
-        ("ok", "  [OK]   已安装 llama.cpp-tools-spacemit (0.1.1-bpo1+6)"),
-        ("ok", "  [OK]   /dev/tcm 为默认 600 —— 回退纯堆内存，预期且最快"),
-        ("d", "  …（其余 5 项：磁盘／系统／内核／spacemit-tcm／TCM 设备节点）"),
-        ("t", "== 模型文件校验 =="),
-        ("ok", "  [OK]   Qwen3.5-2B-Q4_0-self.gguf  1265 MB"),
-        ("ok", "  [OK]   Qwen3.5-4B-Q4_0-self.gguf  2573 MB"),
-        ("t", "== 冒烟测试（生成 8 token） =="),
-        ("o", "  二进制: /usr/bin/llama-cli"),
-        ("o", "  动态库: libllama-common.so.0 libllama.so.0 libggml.so.0 libggml-cpu.so.0"),
-        ("ok", "  [OK]   推理正常出字（llama-cli -c 2048 -t 4 -st --no-mmap）"),
-        ("o", "         [ Prompt: 10.4 t/s | Generation: 3.1 t/s ]"),
-        ("d", "=========================================================="),
-        ("o", " 结果: 通过 **14** 项，失败 **0** 项"),
-        ("d", "=========================================================="),
-    ],
+    source="实机截屏（grim · Wayland）：K1 桌面终端 tmux 会话，2026-11-01 20:05；原始全屏见 raw/fig2_raw.png",
+    shot=os.path.join(RAW, "fig2_raw.png"),
+    shot_crop=(0, 0, 1920, 1012),
     card={
         "title": "关键指标",
         "items": [
@@ -484,30 +496,12 @@ shot(
 
 # 图 3 —— 量化类型根因
 shot(
-    id="fig3", no="3 / 8", win=WIN, chip=CHIP,
+    id="fig3", chrome=False, win="实机截屏 · K1 桌面终端（grim / Wayland）", no="3 / 8", chip=CHIP,
     title="根因：量化类型是否在 IME 白名单内",
     sub="python3 tools/gguf_types.py（mmap 直读头部，秒级）",
-    source="数据来源：K1 实机对两个 GGUF 执行 gguf_types.py 的完整输出",
-    lines=[
-        ("p", "# 官方下载的 Q4_0"),
-        ("p", "python3 tools/gguf_types.py models/Qwen3.5-2B-Q4_0.gguf"),
-        ("o", "=== Qwen3.5-2B-Q4_0.gguf"),
-        ("o", "    GGUF v3, 320 张量, 类型分布: {'F32': 133, 'Q6_K': 1, 'Q4_0': 129, 'Q4_1': 3, 'Q8_0': 36, 'Q5_K': 18}"),
-        ("e", "    二维权重张量 187 个；不在 IME 白名单内 **55** 个 {'Q6_K': 1, 'Q8_0': 36, 'Q5_K': 18}"),
-        ("o", "      token_embd.weight          Q6_K   (2048, 248320)"),
-        ("o", "      blk.0.ssm_alpha.weight     Q8_0   (2048, 16)"),
-        ("o", "      blk.0.ssm_out.weight       Q5_K   (2048, 2048)"),
-        ("o", "      blk.0.ffn_down.weight      Q4_1   (6144, 2048)"),
-        ("p", "# 自建管线产物（统一 Q4_0，embd 走 Q8_0）"),
-        ("p", "python3 tools/gguf_types.py models/Qwen3.5-2B-Q4_0-self.gguf"),
-        ("o", "=== Qwen3.5-2B-Q4_0-self.gguf"),
-        ("o", "    GGUF v3, 320 张量, 类型分布: {'F32': 133, 'Q8_0': 1, 'Q4_0': 186}"),
-        ("ok", "    二维权重张量 187 个；不在 IME 白名单内 **1** 个 {'Q8_0': 1}"),
-        ("o", "      token_embd.weight          Q8_0   (2048, 248320)"),
-        ("o", "      blk.0.ssm_alpha.weight     Q4_0   (2048, 16)"),
-        ("o", "      blk.0.ssm_out.weight       Q4_0   (2048, 2048)"),
-        ("o", "      blk.0.ffn_down.weight      Q4_0   (6144, 2048)"),
-    ],
+    source="实机截屏（grim · Wayland）：K1 桌面终端 tmux 会话，2026-11-01 13:36；原始全屏见 raw/fig3_raw.png",
+    shot=os.path.join(RAW, "fig3_raw.png"),
+    shot_crop=(0, 0, 1920, 1012),
     card={
         "title": "关键差异",
         "items": [
@@ -521,30 +515,16 @@ shot(
 
 # 图 4 —— 端到端出字
 shot(
-    id="fig4", no="4 / 8", win=WIN, chip=CHIP,
+    id="fig4", chrome=False, win="实机截屏 · K1 桌面终端（grim / Wayland）", no="4 / 8", chip=CHIP,
     title="端到端推理：中文输出正常",
-    sub="llama-cli -t 4 -st --no-mmap（未裁剪原文，见底部说明）",
-    source="数据来源：K1 实机 llama-cli 完整输出（2026-11-01，-n 260，含思考过程）",
-    lines=[
-        ("p", "llama-cli -m models/Qwen3.5-2B-Q4_0-self.gguf -p 你好 -n 260 -c 1024 -t 4 -st --no-mmap"),
-        ("o", "> 你好"),
-        ("d", ""),
-        ("d", " | - \\ | / ... [Start thinking]"),
-        ("d", " 嗯，用户突然发来“你好”，这是一个非常简短的开场白。根据我的知识库，我需要判断用户的意图。"),
-        ("d", " 首先，用户可能只是想打招呼，或者需要帮助。考虑到之前的对话历史……"),
-        ("c", " （思考过程共 8 段，此处从略；下面直接看它最终的回复）"),
-        ("d", " [End thinking]"),
-        ("o", ""),
-        ("ok", " 你好呀！我是 Qwen3.5，很高兴为你提供帮助。有什么我可以帮你的吗？"),
-        ("ok", " 比如你想讨论编程、逻辑推理、创意写作，或者其他任何问题？"),
-        ("o", ""),
-        ("o", " [ Prompt: 10.5 t/s | Generation: 2.7 t/s ]"),
-        ("o", " Exiting..."),
-    ],
+    sub="llama-cli -t 4 -st --no-mmap",
+    source="实机截屏（grim · Wayland）：K1 桌面终端 tmux 会话，2026-11-01 13:41；原始全屏见 raw/fig4_raw.png",
+    shot=os.path.join(RAW, "fig4_raw.png"),
+    shot_crop=(0, 0, 1920, 1012),
     card={
         "title": "关键指标",
         "items": [
-            ("2B 生成", "2.7 t/s", "-n 260 长输出实测，与 bench 2.80 一致"),
+            ("2B 生成", "2.8 t/s", "-n 260 长输出实测，与 bench 2.80 一致"),
             ("4B 生成", "1.4 t/s", "同参数 -n 40 实测，与 bench 1.43 一致"),
             ("输出质量", "无乱码 · 无重复", "词表 / 对话模板 / MTP 剥离均正确"),
         ],
@@ -554,7 +534,7 @@ shot(
 
 # 图 5 —— 2B 官方 vs 自产
 shot(
-    id="fig5", no="5 / 8", win=WIN, chip=CHIP, layout="table",
+    id="fig5", chrome=False, win="整理图（非截屏）· 数据来自 results/ 归档记录", no="5 / 8", chip=CHIP, layout="table",
     title="2B：官方 Q4_0 与自产 Q4_0 对比",
     sub="llama-bench -t 4 -p 64,512 -n 128 -fa 1 -r 3",
     source="数据来源：results/ 归档 bench 记录整理（同一运行时 0.1.1，批次差异 ±3%）",
@@ -584,7 +564,7 @@ shot(
 
 # 图 6 —— 4B 官方 vs 自产
 shot(
-    id="fig6", no="6 / 8", win=WIN, chip=CHIP, layout="table",
+    id="fig6", chrome=False, win="整理图（非截屏）· 数据来自 results/ 归档记录", no="6 / 8", chip=CHIP, layout="table",
     title="4B：官方 Q4_0 与自产 Q4_0 对比",
     sub="llama-bench -t 4 -p 64,512 -n 128 -fa 1 -r 2",
     source="数据来源：results/bench_4b_*.txt 归档记录整理（同一运行时 0.1.1）",
@@ -614,7 +594,7 @@ shot(
 
 # 图 7 —— 长上下文衰减
 shot(
-    id="fig7", no="7 / 8", win=WIN, chip=CHIP, layout="table",
+    id="fig7", chrome=False, win="整理图（非截屏）· 数据来自 results/ 归档记录", no="7 / 8", chip=CHIP, layout="table",
     title="长上下文下的优势保持情况",
     sub="llama-bench -p 512 -n 64 -d <depth> -t 4 -fa 1",
     source="数据来源：results/bench_depth_self.txt 与官方同参数记录（2026-10-30）",
@@ -642,7 +622,7 @@ shot(
 
 # 图 8 —— 负结果排除矩阵
 shot(
-    id="fig8", no="8 / 8", win=WIN, chip=CHIP, layout="table",
+    id="fig8", chrome=False, win="整理图（非截屏）· 数据来自 results/ 归档记录", no="8 / 8", chip=CHIP, layout="table",
     title="四条候选路径被实测排除，优化点收敛到单一变量",
     sub="先证伪，再优化：负结果同样是结论",
     source="数据来源：技术文档 §8.2 / §8.3 / §9.4 与 PATCH_TCM.md §10.5 的实测记录",
@@ -682,8 +662,8 @@ TAKEAWAY = {
 # ---------------- 入口 ----------------
 def fill_dynamic():
     """把实机采集到的文本/温度填入 fig4、fig8。"""
-    sm2 = os.path.join(ROOT, "docs", "figs", "demo", ".smoke2b.txt")
-    sm4 = os.path.join(ROOT, "docs", "figs", "demo", ".smoke4b.txt")
+    sm2 = os.path.join(OUT, ".smoke2b.txt")
+    sm4 = os.path.join(OUT, ".smoke4b.txt")
     lines = []
     for tag, path, model in (("2B", sm2, "Qwen3.5-2B-Q4_0-self.gguf"),
                              ("4B", sm4, "Qwen3.5-4B-Q4_0-self.gguf")):
