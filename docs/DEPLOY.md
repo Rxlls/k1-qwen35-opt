@@ -312,7 +312,8 @@ ggml/src/ggml-cpu/spacemit/ime.cpp:1704:
 
 - 使用 **apt 原版 0.1.1**（本项目基线）：保持 `/dev/tcm` 为 `600`，**不要 chmod**。
   `falling back to heap` 是预期且最优的行为，`errno=13` 也不会出现（因为它根本不打开 `/dev/tcm`）。
-- 使用 **打了 TCM patch 的版本**：才需要 `sudo chmod 666 /dev/tcm`（重启失效）或 udev 规则持久化：
+- 使用 **打了 TCM patch 的版本**：`600` 下同样能正常跑（实测 `rc=0`，同模型同参数 3.0 t/s，与堆内存持平），
+  只有想验证"TCM 是否真的分配上了"时才需要 `sudo chmod 666 /dev/tcm`（重启失效）或 udev 规则持久化：
 
   ```bash
   echo 'KERNEL=="tcm", MODE="0666"' | sudo tee /etc/udev/rules.d/99-tcm.rules
@@ -354,6 +355,50 @@ cat /sys/class/thermal/thermal_zone0/temp
 ### 5.6 模型能加载但输出乱码 / 重复
 
 几乎都是转换链某步被跳过。按 §2.6 三项校验逐条核对，不要凭"能跑"判断正确性。
+
+### 5.7 冒烟测试报 `timeout: 被监视的命令已核心转储`
+
+**现象**：`deploy.sh` 走到冒烟测试，末尾三行是
+
+```
+CPU_RISCV64_SPACEMIT: alloc_chunk: open(/dev/tcm) failed, errno=13
+CPU_RISCV64_SPACEMIT: failed to allocate init_barrier from shared mem, falling back to heap
+timeout: 被监视的命令已核心转储
+```
+
+**判读顺序（别先怀疑 TCM 权限）**：
+
+1. `errno=13` 与 `falling back to heap` 都是**预期现象**，不是失败原因（见 §5.3）。原版 0.1.1 在这里会报 `errno=2`，同样是预期。
+2. `核心转储` 说明进程被信号打死。`deploy.sh` 会把子进程退出码翻译成信号名：`139=SIGSEGV`（多为动态库混用）、`134=SIGABRT`（线程数超 `perfer_core_ids`）、`132=SIGILL`。
+3. 最常见的根因是**动态库混用**：shell 里残留了别的构建的 `LD_LIBRARY_PATH`，或 `PATH` 里的 `llama-cli` 与 `ldd` 解析出的 lib 不是同一次编译的产物（§10.3 记过同类坑）。
+
+**定位三行**：
+
+```bash
+echo "[$LD_LIBRARY_PATH]"                                  # 有没有残留
+command -v llama-cli
+ldd "$(command -v llama-cli)" | grep -E 'llama|ggml'       # 每行都应指向同一目录
+bash ~/cie/tools/deploy.sh smoke                           # 新版会打印「二进制:」「动态库:」两行
+```
+
+`deploy.sh` 的二进制择序是 `LLAMA_CLI` > `/usr/bin/llama-cli`（apt 原版，项目基线）> `PATH`，
+默认避开自建产物的库路径问题；要用自建版就显式指定：
+
+```bash
+LLAMA_CLI=$HOME/cie/src/llama011/bin/llama-cli \
+LD_LIBRARY_PATH=$HOME/cie/src/llama011/lib \
+  bash ~/cie/tools/deploy.sh smoke
+```
+
+**2026-11-01 实测基线**（同机、同模型，`-p 你好 -n 8 -c 2048 -t 4 -st --no-mmap`）：
+
+| 配置 | 结果 |
+|---|---|
+| `/usr/bin/llama-cli`（apt 原版，`LD_LIBRARY_PATH` 为空） | `rc=0`，Prompt 10.4 t/s，Generation 3.1 t/s |
+| 自建 patch 版 + 自建 lib，`/dev/tcm` 仍为 `600` | `rc=0`，Generation 3.0 t/s（同样回退堆内存） |
+
+两条路径都能正常出字 → 若出现 core dump，问题在**当次 shell 的环境态**，与模型文件、TCM patch、`/dev/tcm` 权限均无关。
+换一个干净 shell（`env -u LD_LIBRARY_PATH bash ~/cie/tools/deploy.sh smoke`）即可验证。
 
 ---
 
