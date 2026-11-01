@@ -37,7 +37,7 @@ ls ~/cie/results/          # bench_2b_*.txt / bench_4b_*.txt / bench_depth_self.
 | 图 | 演示步骤 | 在 K1 上执行的命令 | 画面必须出现的要素 | 必须标注的数字 | 文件 |
 |---|---|---|---|---|---|
 | 1 | 交代硬件身份 | `uname -srm` `nproc` `free -m` `head -3 /etc/os-release` `df -h /` `grep -m1 '^isa' /proc/cpuinfo` | 内核串里带 `riscv64`；ISA 串同时出现 `_v`/`_zve*` 与 `_ime` | 8 核 · 7849 MB · `_ime` · Bianbu 2.3.5 · 内核 6.6.63 | `fig1.png` |
-| 2 | 一键部署自检 | `bash ~/cie/tools/deploy.sh` | 逐项 `[OK]`、冒烟 `推理正常出字`、末行汇总 | **14 项通过 / 0 失败**、`3.1 t/s`、模型 1265 / 2573 MB | `fig2.png` |
+| 2 | 一键部署自检 | `bash ~/cie/tools/deploy.sh` | 逐项 `[OK]`、冒烟 `推理正常出字`、末行汇总 | **14 项通过 / 0 失败**（该次尚未加哈希清单；现已 15 项）、`3.1 t/s`、模型 1265 / 2573 MB | `fig2.png` |
 | 3 | 根因：量化类型 | `python3 tools/gguf_types.py models/Qwen3.5-2B-Q4_0.gguf`（官方）与 `…-self.gguf`（自产） | 两份"类型分布"行并排可比 | 非白名单张量 **55 → 1**、Q4_0 张量 **129 → 186**、体积 1.12 → 1.22 GiB | `fig3.png` |
 | 4 | 端到端出字 | `llama-cli -m models/Qwen3.5-2B-Q4_0-self.gguf -p 你好 -n 260 -c 1024 -t 4 -st --no-mmap` | 中文回复本体（不乱码、不重复） | 生成速度 **2.8 t/s**（2B，与 bench 2.80 一致）/ **1.4 t/s**（4B） | `fig4.png` |
 | 5 | 2B 官方 vs 自产 | `llama-bench -m <模型> -t 4 -p 64,512 -n 128 -fa 1 -r 3` | 两组 pp64/pp512/tg128 同行对比 | **pp512 10.84 → 20.36（+87.8%）**、tg128 2.84 → 2.80 | `fig5.png` |
@@ -58,7 +58,8 @@ ls ~/cie/results/          # bench_2b_*.txt / bench_4b_*.txt / bench_depth_self.
 ### 图 2 · 一键部署自检（实机截屏）
 
 - **画面要点**：环境项逐条 `[OK]`；模型体积；冒烟 `推理正常出字` 与末尾 `通过 14 项，失败 0 项`。
-- **标注**：14/14（环境 11 + 模型 2 + 冒烟 1）、2B 1265 MB、4B 2573 MB、冒烟 3.1 t/s。
+  （该截屏摄于 `docs/hashes.txt` 加入之前；现在同一脚本会多跑一项 sha256 校验，结果为 15 项。）
+- **标注**：14/14（环境 11 + 模型 2 + 冒烟 1；加哈希清单后为 15）、2B 1265 MB、4B 2573 MB、冒烟 3.1 t/s。
 - **图注**：*`deploy.sh` 从架构、扩展、内存、依赖包一路检到模型体积与冒烟推理，14 项全绿；脚本失败即停并给出修复建议。*
 
 ### 图 3 · 根因：量化类型是否在 IME 白名单内（实机截屏）
