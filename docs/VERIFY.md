@@ -190,7 +190,7 @@ sed -n '1,40p' docs/AUDIT.md                                # 未闭环项清单
 | 现象 | 原因 | 排查 |
 |---|---|---|
 | 文档改了但 docx 没变 | 只改了 md | `pandoc 技术文档.md -o x.docx --reference-doc=技术文档.docx` + `tools/format_docx.py` |
-| docx 版式错乱 | 换了样式模板 | 必须用**原 docx** 作 `--reference-doc`；生成后核对"48 表 / 4 图" |
+| docx 版式错乱 | 换了样式模板 | 必须用**原 docx** 作 `--reference-doc`；生成后核对"49 表 / 4 图"（B0 补测后 §7.1 新增一张归因表） |
 
 ---
 

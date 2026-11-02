@@ -258,10 +258,10 @@ git ls-remote --tags https://github.com/spacemit-com/llama.cpp | grep -E '0\.1\.
 
 交叉验证：apt 二进制 `llama-bench` 打印的构建串是 `17ce6aa`，与上面 tag 指向的 commit 前 7 位完全一致；该 commit 日期 2026-05-22，与包构建时间 `Fri, 22 May 2026 19:08:52 +0800` 同日。⇒ **运行时 0.1.1、TCM patch 版、量化器三者的来源都可追溯到具体 commit。**
 
-（原 #7「ggml-org/llama.cpp B0 基线 commit」已删除。准确地说不是"弃用"，而是**从未实施**：
-B0（社区主线）需单独交叉编译约 2 小时，且不满足赛题"必须使用进迭时空开源 llama.cpp"的硬性要求，
-优先级排在 B2 之后，最终没做。没有实验就没有版本可固化，这一项在"版本固化清单"里没有对象可记——
-技术文档 §7 与 §11.3 已如实标注"未实施、不做任何推断"，答辩口径（DEFENSE 第 3 条）也已准备。）
+（原 #7「ggml-org/llama.cpp B0 基线 commit」曾被删除，理由是"从未实施"。**2026-11-02 已补测**，
+commit `785322d`，构建细节见下一节。当时"需约 2 小时"的估计是错的——那是按 K1 本机编译推算的，
+换 x86 交叉编译后实际 clone 1 分钟 + configure 19 秒 + 编译 2 分 35 秒，
+技术文档 §7 与 §11.3 已由"未实施"改为实测三级归因。）
 
 ---
 
@@ -283,3 +283,49 @@ cd ~/cie/models && sha256sum -c ../docs/weights.sha256     # 27 项应全部 OK
 ```
 
 > 说明：ModelScope 会在目录里放 `.msc`、`.mv` 两个下载元数据文件，它们不属于模型内容，未纳入清单。
+
+---
+
+## B0 基线（上游社区主线）构建记录
+
+原「待补全项 #7」曾按"从未实施"删除；**2026-11-02 完成补测**，此处固化其身份，使三条运行时基线（B0 / B1 / B2）都可追溯。
+
+| 项 | 值 |
+|---|---|
+| 源码 | `github.com/ggml-org/llama.cpp` |
+| commit | **`785322d`**（`requirements : fix numpy dependencies (#31508)`，2026-11-01） |
+| ggml 版本 | 0.28.0 |
+| 编译器 | spacemit-toolchain v1.2.4 自带 **GCC 15.2.0**（x86_64 交叉编译） |
+| 目标指令集 | `-march=rv64gcv_zfh_zvfh_zicbop_zihintpause -mabi=lp64d`（CMake 自动生成） |
+| IME 后端 | **无**——上游不含 spacemit 私有 `GGML_SPACEMIT` 后端，走纯 RVV 路径 |
+| 产物 | `llama-bench` 主程序 12 KB + 6 个自建 `.so`，压缩包 4.5 MB |
+| 部署位置 | K1 上 `~/cie/src/llamaup/bin/`，运行时指定 `LD_LIBRARY_PATH` |
+| GGUF 兼容性 | **可直接加载本项目产出的 Qwen3.5 GGUF，无需任何转换**（架构标识 `qwen35` 上游已支持） |
+
+构建命令（WSL，交叉编译）：
+
+```bash
+TC=/home/an/k1build/spacemit-toolchain-linux-glibc-x86_64-v1.2.4
+cmake -B build-xc -G Ninja -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_SYSTEM_PROCESSOR=riscv64 \
+  -DCMAKE_C_COMPILER=$TC/bin/riscv64-unknown-linux-gnu-gcc \
+  -DCMAKE_CXX_COMPILER=$TC/bin/riscv64-unknown-linux-gnu-g++ \
+  -DLLAMA_CURL=OFF -DLLAMA_BUILD_WEBUI=OFF -DLLAMA_BUILD_TESTS=OFF \
+  -DLLAMA_BUILD_SERVER=OFF -DGGML_NATIVE=OFF
+ninja -C build-xc llama-bench -j3      # 4 核 WSL 实测 2 分 35 秒
+```
+
+版本自检：
+
+```bash
+LD_LIBRARY_PATH=~/cie/src/llamaup/bin ~/cie/src/llamaup/bin/llama-bench --version
+# version: 0.8.0-dev (build 1, commit 785322d)
+# built with GNU 15.2.0 for Linux riscv64
+```
+
+> **与 spacemit fork 的两处接口差异**：① 上游已把 `llama-cli` 并入 `llama-app`（没有 `llama-cli` 这个 target）；
+> ② `-fa` 取值是 `on|off|auto`，fork 用 `1|0`。本项目对比统一用 `-fa on`，与 fork 的 `-fa 1` 等价。
+>
+> **补测成本远低于原估计**：原记录写"需约 2 小时交叉编译"，实测 clone 1 分钟 + configure 19 秒 + 编译 2 分 35 秒，
+> 端到端不到 30 分钟。原估计按 K1 本机编译推算，而 K1 的 GCC 13.2 缺 Zvfh、本就编不了 spacemit 后端，
+> 换 x86 交叉编译后时间不成问题。
