@@ -18,6 +18,7 @@ import hashlib
 import os
 import subprocess
 import sys
+import time
 import zipfile
 
 PROJECT = "k1-qwen35-opt"
@@ -110,7 +111,17 @@ def main():
     os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
     with zipfile.ZipFile(args.out, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as z:
         for rel in payload:
-            z.write(os.path.join(ROOT, rel), rel)
+            full = os.path.join(ROOT, rel)
+            zi = zipfile.ZipInfo(rel, date_time=time.localtime(os.path.getmtime(full))[:6])
+            zi.compress_type = zipfile.ZIP_DEFLATED
+            # 关键：显式声明文件名是 UTF-8。否则解压端会按本地编码猜，
+            # 中文名（00_提交说明.md、docs/技术文档.docx）会变成乱码，sha256 -c 直接读不到文件。
+            zi.flag_bits |= 0x800
+            # 保留权限位：脚本 755，其余 644
+            mode = 0o755 if rel.endswith((".sh", ".py")) else 0o644
+            zi.external_attr = mode << 16
+            with open(full, "rb") as fp:
+                z.writestr(zi, fp.read(), compresslevel=9)
 
     size = os.path.getsize(args.out)
     with zipfile.ZipFile(args.out) as z:
