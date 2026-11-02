@@ -184,7 +184,7 @@ llama-bench -m ~/cie/models/Qwen3.5-2B-Q4_0-self.gguf -t 4 -p 512 -n 64 -d 0,409
 ```bash
 grep -rn "20.36\|10.84\|8.10\|3.80" docs/*.md | wc -l     # 一致性抽检
 ls ~/cie/results/ | wc -l                                   # 归档文件数（应 ≥ 60）
-sed -n '1,40p' docs/AUDIT.md                                # 未闭环项清单
+sed -n '1,40p' docs/AUDIT.md                                # 审计结论速览（第 4 节为闭环状态）
 ```
 
 **判断标准**：`docs/AUDIT.md` 第 4 节应为「已全部闭环（0 处）」；无「文档有值、归档无文件」的数字；图 5/6/7/8 与正文一致。
