@@ -457,7 +457,7 @@ def shot(**kw):
 
 # 图 1 —— 环境身份
 shot(
-    id="fig1", chrome=False, win="实机截屏 · K1 桌面终端（grim / Wayland）", no="1 / 8", chip=CHIP,
+    id="fig1", chrome=False, win="实机截屏 · K1 桌面终端（grim / Wayland）", no="1 / 9", chip=CHIP,
     title="环境与硬件身份",
     sub="Bianbu 2.3.5 · Linux 6.6.63 · 8 × X60 @1.6 GHz",
     source="实机截屏（grim · Wayland）：K1 桌面终端 tmux 会话，2026-11-01 13:35；原始全屏见 raw/fig1_raw.png",
@@ -477,7 +477,7 @@ shot(
 
 # 图 2 —— 一键部署自检
 shot(
-    id="fig2", chrome=False, win="实机截屏 · K1 桌面终端（grim / Wayland）", no="2 / 8", chip=CHIP,
+    id="fig2", chrome=False, win="实机截屏 · K1 桌面终端（grim / Wayland）", no="2 / 9", chip=CHIP,
     title="一键部署自检",
     sub="bash ~/cie/tools/deploy.sh",
     source="实机截屏（grim · Wayland）：K1 桌面终端 tmux 会话，2026-11-01 20:05；原始全屏见 raw/fig2_raw.png",
@@ -496,7 +496,7 @@ shot(
 
 # 图 3 —— 量化类型根因
 shot(
-    id="fig3", chrome=False, win="实机截屏 · K1 桌面终端（grim / Wayland）", no="3 / 8", chip=CHIP,
+    id="fig3", chrome=False, win="实机截屏 · K1 桌面终端（grim / Wayland）", no="3 / 9", chip=CHIP,
     title="根因：量化类型是否在 IME 白名单内",
     sub="python3 tools/gguf_types.py（mmap 直读头部，秒级）",
     source="实机截屏（grim · Wayland）：K1 桌面终端 tmux 会话，2026-11-01 13:36；原始全屏见 raw/fig3_raw.png",
@@ -515,7 +515,7 @@ shot(
 
 # 图 4 —— 端到端出字
 shot(
-    id="fig4", chrome=False, win="实机截屏 · K1 桌面终端（grim / Wayland）", no="4 / 8", chip=CHIP,
+    id="fig4", chrome=False, win="实机截屏 · K1 桌面终端（grim / Wayland）", no="4 / 9", chip=CHIP,
     title="端到端推理：中文输出正常",
     sub="llama-cli -t 4 -st --no-mmap",
     source="实机截屏（grim · Wayland）：K1 桌面终端 tmux 会话，2026-11-01 13:41；原始全屏见 raw/fig4_raw.png",
@@ -534,7 +534,7 @@ shot(
 
 # 图 5 —— 2B 官方 vs 自产
 shot(
-    id="fig5", chrome=False, win="整理图（非截屏）· 数据来自 results/ 归档记录", no="5 / 8", chip=CHIP, layout="table",
+    id="fig5", chrome=False, win="整理图（非截屏）· 数据来自 results/ 归档记录", no="5 / 9", chip=CHIP, layout="table",
     title="2B：官方 Q4_0 与自产 Q4_0 对比",
     sub="llama-bench -t 4 -p 64,512 -n 128 -fa 1 -r 3",
     source="数据来源：results/ 归档 bench 记录整理（同一运行时 0.1.1，批次差异 ±3%）",
@@ -564,7 +564,7 @@ shot(
 
 # 图 6 —— 4B 官方 vs 自产
 shot(
-    id="fig6", chrome=False, win="整理图（非截屏）· 数据来自 results/ 归档记录", no="6 / 8", chip=CHIP, layout="table",
+    id="fig6", chrome=False, win="整理图（非截屏）· 数据来自 results/ 归档记录", no="6 / 9", chip=CHIP, layout="table",
     title="4B：官方 Q4_0 与自产 Q4_0 对比",
     sub="llama-bench -t 4 -p 64,512 -n 128 -fa 1 -r 2",
     source="数据来源：results/bench_4b_*.txt 归档记录整理（同一运行时 0.1.1）",
@@ -594,7 +594,7 @@ shot(
 
 # 图 7 —— 长上下文衰减
 shot(
-    id="fig7", chrome=False, win="整理图（非截屏）· 数据来自 results/ 归档记录", no="7 / 8", chip=CHIP, layout="table",
+    id="fig7", chrome=False, win="整理图（非截屏）· 数据来自 results/ 归档记录", no="7 / 9", chip=CHIP, layout="table",
     title="长上下文下的优势保持情况",
     sub="llama-bench -p 512 -n 64 -d <depth> -t 4 -fa 1",
     source="数据来源：results/bench_depth_self.txt 与官方同参数记录（2026-10-30）",
@@ -622,7 +622,7 @@ shot(
 
 # 图 8 —— 负结果排除矩阵
 shot(
-    id="fig8", chrome=False, win="整理图（非截屏）· 数据来自 results/ 归档记录", no="8 / 8", chip=CHIP, layout="table",
+    id="fig8", chrome=False, win="整理图（非截屏）· 数据来自 results/ 归档记录", no="8 / 9", chip=CHIP, layout="table",
     title="四条候选路径被实测排除，优化点收敛到单一变量",
     sub="先证伪，再优化：负结果同样是结论",
     source="数据来源：技术文档 §8.2 / §8.3 / §9.4 与 PATCH_TCM.md §10.5 的实测记录",
@@ -668,6 +668,38 @@ shot(
     },
 )
 
+# 图 9 —— 三级归因阶梯
+shot(
+    id="fig9", chrome=False, win="整理图（非截屏）· 数据来自 results/ 归档记录", no="9 / 9", chip=CHIP, layout="table",
+    title="换运行时与换量化文件是两条独立增益，可分离且乘性叠加",
+    sub="B0 上游主线的加入，让 +87.8% 不再是一个无法拆解的黑箱数字",
+    source="数据来源：results/bench_{2b,4b}_upstream_{off,self}.txt（B0）与 §8.1/§8.2 归档记录（B1/O）",
+    meta="测量口径：-t 4 -p 64,512 -n 128 -fa on(=1) -mmp 0 -r 3(2B) / 2(4B) · B0 = upstream 785322d 纯 RVV · B1 = apt 0.1.1 含 IME",
+    cols=[("阶段", 330, "l"), ("2B pp512", 150, "c"), ("4B pp512", 150, "c"), ("相对上一阶段", 250, "c")],
+    rows=[
+        ["B0 上游 785322d（纯 RVV）+ 官方 Q4_0", "8.67", "3.01", "—"],
+        ["+ IME 后端（厂商 0.1.1，仍用官方 Q4_0）= **B1**", "10.84", "3.80", "**+25.0% / +26.2%**"],
+        ["+ 纯 Q4_0 量化（换成自产）= **O**", "**20.36**", "**8.10**", "**+87.8% / +113.2%**"],
+        ["交叉校验：在 B0 上直接换自产文件", "13.83", "5.14", "+59.5% / +70.8%"],
+    ],
+    emph_row=2,
+    bars_title="2B pp512（t/s）三阶段；4B 数值见上表",
+    bars=[
+        ("B0 纯 RVV", 8.67, "#3d6b8f"), ("+ IME 后端", 10.84, "#c9a227"), ("+ 纯 Q4_0 量化", 20.36, "#4fbf8b"),
+    ],
+    notes=["前两行逐级叠加（先换运行时、再换量化文件），末行直接跳（在纯 RVV 上直接换自产）。",
+           "8.67 × 1.250 × 1.878 = 20.36 精确吻合；末行的 +59.5% 在无 IME 环境下取得。"],
+    card={
+        "title": "归因拆分",
+        "items": [
+            ("量化增益", "+59.5% / +70.8%", "B0 内自产 vs 官方，无 IME 也成立"),
+            ("运行时增益", "+25.0% / +26.2%", "IME 后端对官方混合量化文件"),
+            ("叠加", "×1.250 × 1.878", "= 20.36，与 O 实测吻合"),
+        ],
+        "notes": ["两条增益可分别度量，也可预测：任一运行时的 O 值 = 该运行时官方值 × 量化增益"],
+    },
+)
+
 TAKEAWAY = {
     "fig1": "架构与扩展是前提：RVV 与 IME 同时可用，但具体走哪条计算路径，由权重文件的量化类型决定。",
     "fig2": "14 项自检全绿，说明脚本可复现、模型完整、运行时匹配；冒烟能出字是最低验收线。",
@@ -677,6 +709,7 @@ TAKEAWAY = {
     "fig6": "4B 的提升更大（+113.2%），说明官方大模型文件的混合精度问题更严重，自建管线的价值随模型增大而放大。",
     "fig7": "优势随上下文加深单调收窄但始终为正；decode 两版几乎重合，说明 decode 与量化类型无关。",
     "figA": "独立复跑得到 +84.7%，与 §8.1 的 +87.8% 相差 1.7%：结论稳定，绝对值随批次小幅浮动。",
+    "fig9": "量化增益在完全没有 IME 的上游版本上仍然成立（+59.5%/+70.8%），且与运行时增益乘性叠加——这才是 +87.8% 的完整拆解。",
     "fig8": "四个直觉方向全部被实测排除，剩下的唯一变量就是量化类型——这也是本次优化只改一处却能翻倍的原因。",
 }
 
