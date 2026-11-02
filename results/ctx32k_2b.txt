@@ -1,0 +1,1 @@
+[ Prompt: 12.0 t/s | Generation: 3.3 t/s ]

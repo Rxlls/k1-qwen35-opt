@@ -1,0 +1,69 @@
+CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0
+CPU_RISCV64_SPACEMIT: alloc_chunk: open(/dev/tcm_sync_mem) failed, errno=2
+CPU_RISCV64_SPACEMIT: failed to allocate init_barrier from shared mem, falling back to heap
+0.00.017.009 I log_info: verbosity = 3 (adjust with the `-lv N` CLI arg)
+0.00.017.035 I device_info:
+0.00.017.097 I   - CPU     : Spacemit(R) X60 (7849 MiB, 7849 MiB free)
+0.00.017.456 I system_info: n_threads = 4 (n_threads_batch = 4) / 8 | CPU : RISCV_V = 1 | RVV_VLEN = 32 | LLAMAFILE = 1 | OPENMP = 1 | 
+0.00.017.484 I srv          main: n_parallel is set to auto, using n_parallel = 4 and kv_unified = true
+0.00.018.160 I srv          init: using 8 threads for HTTP server
+0.00.018.848 I srv         start: binding port with default address family
+0.00.020.584 I srv          main: loading model
+0.00.020.640 I srv    load_model: loading model '/home/a/cie/models/Qwen3.5-2B-Q4_0-self.gguf'
+0.00.020.812 I common_init_result: fitting params to device memory ...
+0.00.020.828 I common_init_result: (for bugs during this step try to reproduce them with -fit off, or provide --verbose logs if the bug only occurs with -fit on)
+0.04.385.025 I common_params_fit_impl: projected to use 1135 MiB of host memory vs. 7849 MiB of total host memory
+0.13.855.694 W llama_context: n_ctx_seq (4096) < n_ctx_train (262144) -- the full capacity of the model will not be utilized
+0.14.051.483 W common_init_from_params: warming up the model with an empty run - please wait ... (--no-warmup to disable)
+0.14.476.658 I srv    load_model: initializing slots, n_slots = 4
+0.14.928.154 W srv    load_model: speculative decoding will use checkpoints
+0.14.928.229 W common_speculative_init: no implementations specified for speculative decoding
+0.14.928.238 I slot   load_model: id  0 | task -1 | new slot, n_ctx = 4096
+0.14.928.290 I slot   load_model: id  1 | task -1 | new slot, n_ctx = 4096
+0.14.928.295 I slot   load_model: id  2 | task -1 | new slot, n_ctx = 4096
+0.14.928.300 I slot   load_model: id  3 | task -1 | new slot, n_ctx = 4096
+0.14.928.659 I srv    load_model: prompt cache is enabled, size limit: 8192 MiB
+0.14.928.679 I srv    load_model: use `--cache-ram 0` to disable the prompt cache
+0.14.928.683 I srv    load_model: for more info see https://github.com/ggml-org/llama.cpp/pull/16391
+0.14.928.820 I srv          init: idle slots will be saved to prompt cache and cleared upon starting a new task
+0.15.080.171 I init: chat template, example_format: '<|im_start|>system
+You are a helpful assistant<|im_end|>
+<|im_start|>user
+Hello<|im_end|>
+<|im_start|>assistant
+Hi there<|im_end|>
+<|im_start|>user
+How are you?<|im_end|>
+<|im_start|>assistant
+<think>
+'
+0.15.196.757 I srv          init: init: chat template, thinking = 1
+0.15.196.960 I srv          main: model loaded
+0.15.197.011 I srv          main: server is listening on http://127.0.0.1:8082
+0.15.197.042 I srv  update_slots: all slots are idle
+0.16.187.682 I slot get_availabl: id  3 | task -1 | selected slot by LRU, t_last = -1
+0.16.187.701 I srv  get_availabl: updating prompt cache
+0.16.187.719 I srv          load:  - looking for better prompt, base f_keep = -1.000, sim = 0.000
+0.16.187.736 I srv        update:  - cache state: 0 prompts, 0.000 MiB (limits: 8192.000 MiB, 4096 tokens, 8589934592 est)
+0.16.187.751 I srv  get_availabl: prompt cache update took 0.04 ms
+0.16.187.925 I slot launch_slot_: id  3 | task 0 | processing task, is_child = 0
+0.53.413.070 I slot print_timing: id  3 | task 0 | n_decoded =    100, tg =   2.79 t/s
+0.56.657.787 I slot print_timing: id  3 | task 0 | n_decoded =    109, tg =   2.79 t/s
+0.59.916.173 I slot print_timing: id  3 | task 0 | n_decoded =    118, tg =   2.79 t/s
+1.03.244.118 I slot print_timing: id  3 | task 0 | n_decoded =    127, tg =   2.78 t/s
+1.06.505.798 I slot print_timing: id  3 | task 0 | n_decoded =    136, tg =   2.78 t/s
+1.09.767.604 I slot print_timing: id  3 | task 0 | n_decoded =    145, tg =   2.78 t/s
+1.13.035.176 I slot print_timing: id  3 | task 0 | n_decoded =    154, tg =   2.78 t/s
+1.16.308.838 I slot print_timing: id  3 | task 0 | n_decoded =    163, tg =   2.78 t/s
+1.19.561.994 I slot print_timing: id  3 | task 0 | n_decoded =    172, tg =   2.78 t/s
+1.22.843.404 I slot print_timing: id  3 | task 0 | n_decoded =    181, tg =   2.77 t/s
+1.26.094.636 I slot print_timing: id  3 | task 0 | n_decoded =    190, tg =   2.77 t/s
+1.29.381.073 I slot print_timing: id  3 | task 0 | n_decoded =    199, tg =   2.77 t/s
+1.32.628.293 I slot print_timing: id  3 | task 0 | n_decoded =    208, tg =   2.77 t/s
+1.35.910.883 I slot print_timing: id  3 | task 0 | n_decoded =    217, tg =   2.77 t/s
+1.38.456.074 I slot print_timing: id  3 | task 0 |   text prefill =    1396.46 ms /    23 tokens (   60.72 ms per token,    16.47 tokens per second)
+1.38.456.123 I slot print_timing: id  3 | task 0 |         decode =   80871.56 ms /   224 tokens (  361.03 ms per token,     2.77 tokens per second)
+1.38.456.129 I slot print_timing: id  3 | task 0 |          total =   82268.02 ms /   247 tokens
+1.38.456.308 I slot      release: id  3 | task 0 | stop processing: n_tokens = 246, truncated = 0
+1.38.456.355 I srv  update_slots: all slots are idle
+1.38.569.215 I srv    operator(): operator(): cleaning up before exit...

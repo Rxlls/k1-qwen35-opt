@@ -1,0 +1,13 @@
+### Qwen3.5-2B-Q4_0.gguf t=4
+| qwen35 2B Q4_0                 |   1.12 GiB |     1.88 B | SPACEMIT   |  -1 |       4 |   1 |       none |           pp128 |          2.77 ± 0.00 |
+| qwen35 2B Q4_0                 |   1.12 GiB |     1.88 B | SPACEMIT   |  -1 |       4 |   1 |       none |            tg64 |          1.86 ± 0.00 |
+### Qwen3.5-2B-Q4_0.gguf t=8
+| qwen35 2B Q4_0                 |   1.12 GiB |     1.88 B | SPACEMIT   |  -1 |   1 |       none |           pp128 |          4.98 ± 0.02 |
+| qwen35 2B Q4_0                 |   1.12 GiB |     1.88 B | SPACEMIT   |  -1 |   1 |       none |            tg64 |          2.85 ± 0.01 |
+### Qwen3.5-2B-Q4_0-self.gguf t=4
+| qwen35 2B Q4_0                 |   1.22 GiB |     1.88 B | SPACEMIT   |  -1 |       4 |   1 |       none |           pp128 |          2.93 ± 0.00 |
+| qwen35 2B Q4_0                 |   1.22 GiB |     1.88 B | SPACEMIT   |  -1 |       4 |   1 |       none |            tg64 |          1.83 ± 0.00 |
+### Qwen3.5-2B-Q4_0-self.gguf t=8
+| qwen35 2B Q4_0                 |   1.22 GiB |     1.88 B | SPACEMIT   |  -1 |   1 |       none |           pp128 |          5.26 ± 0.01 |
+| qwen35 2B Q4_0                 |   1.22 GiB |     1.88 B | SPACEMIT   |  -1 |   1 |       none |            tg64 |          2.74 ± 0.04 |
+DONE

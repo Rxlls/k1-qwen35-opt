@@ -1,0 +1,3 @@
+    单轮 prompt_n=8 prompt_tps=7.97 gen_n=64 gen_tps=2.80
+    长prompt prompt_n=1200 prompt_tps=19.22 gen_n=32 gen_tps=2.62
+    多轮2 prompt_n=42 prompt_tps=15.54 gen_n=64 gen_tps=2.80

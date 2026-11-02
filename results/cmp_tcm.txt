@@ -1,0 +1,5 @@
+=== PATCHED(全TCM) ===
+CPU_RISCV64_SPACEMIT: tcm is available, blk_size: 131072, blk_num: 4, is_fake_tcm: 0
+| qwen35 2B Q4_0                 |   1.22 GiB |     1.88 B | CPU        |       4 |  1 |           pp512 |          9.57 ± 0.03 |
+| qwen35 2B Q4_0                 |   1.22 GiB |     1.88 B | CPU        |       4 |  1 |            tg64 |          1.29 ± 0.01 |
+=== APT(半TCM) ===

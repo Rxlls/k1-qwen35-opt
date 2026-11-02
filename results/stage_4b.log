@@ -1,0 +1,31 @@
+[20:04:50] run_tomorrow 开始  stage=4b  host=aa
+[20:04:50] 内存   磁盘 65G 可用
+------------------------------------------------------------
+[20:04:50] STAGE 4b — 五个版本 bench（同口径 -r 2）
+[20:04:50] bench 4b_off_q4_0  (model=Qwen3.5-4B-Q4_0.gguf)
+  | qwen35 4B Q4_0                 |   2.40 GiB |     4.21 B | CPU        |       4 |  1 |    0 |            pp64 |          3.94 ± 0.00 |
+  | qwen35 4B Q4_0                 |   2.40 GiB |     4.21 B | CPU        |       4 |  1 |    0 |           pp512 |          3.80 ± 0.00 |
+  | qwen35 4B Q4_0                 |   2.40 GiB |     4.21 B | CPU        |       4 |  1 |    0 |           tg128 |          1.32 ± 0.00 |
+[20:16:02]   完成 耗时672s
+[20:16:02] bench 4b_self_q4_0  (model=Qwen3.5-4B-Q4_0-self.gguf)
+  | qwen35 4B Q4_0                 |   2.50 GiB |     4.21 B | CPU        |       4 |  1 |    0 |            pp64 |          8.93 ± 0.01 |
+  | qwen35 4B Q4_0                 |   2.50 GiB |     4.21 B | CPU        |       4 |  1 |    0 |           pp512 |          8.10 ± 0.30 |
+  | qwen35 4B Q4_0                 |   2.50 GiB |     4.21 B | CPU        |       4 |  1 |    0 |           tg128 |          1.43 ± 0.00 |
+[20:22:58]   完成 耗时416s
+[20:22:58] bench 4b_self_q4km  (model=Qwen3.5-4B-Q4KM-q8emb.gguf)
+  | qwen35 4B Q4_K - Medium        |   2.66 GiB |     4.21 B | CPU        |       4 |  1 |    0 |            pp64 |          4.50 ± 0.00 |
+  | qwen35 4B Q4_K - Medium        |   2.66 GiB |     4.21 B | CPU        |       4 |  1 |    0 |           pp512 |          4.37 ± 0.00 |
+  | qwen35 4B Q4_K - Medium        |   2.66 GiB |     4.21 B | CPU        |       4 |  1 |    0 |           tg128 |          1.28 ± 0.00 |
+[20:33:38]   完成 耗时640s
+[20:33:38] bench 4b_self_q5km  (model=Qwen3.5-4B-Q5KM-q8emb.gguf)
+已终止
+[21:23:46]   FAIL rc=143 耗时3008s -> /home/a/cie/results/bench_4b_self_q5km_20261031_200450.txt
+[21:23:46] bench 4b_self_q3km  (model=Qwen3.5-4B-Q3KM-q8emb.gguf)
+已终止
+[21:43:39]   FAIL rc=143 耗时1193s -> /home/a/cie/results/bench_4b_self_q3km_20261031_200450.txt
+------------------------------------------------------------
+[21:43:39] 汇总
+[21:43:39]   日志: /home/a/cie/results/run_20261031_200450.log
+[21:43:39]   结果目录: /home/a/cie/results
+[21:43:39]   失败项 (2): bench:4b_self_q5km bench:4b_self_q3km
+[21:43:39]   当前内存:   温度: 31C

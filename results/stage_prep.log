@@ -1,0 +1,16 @@
+[20:03:03] run_tomorrow 开始  stage=prep  host=aa
+[20:03:03] 内存   磁盘 68G 可用
+------------------------------------------------------------
+[20:03:03] STAGE prep — 生成 4B 自产 Q4_0（收尾转换量化闭环）
+[20:04:06]   量化耗时 63s rc=0
+[20:04:06]   体积: 2.6G
+[20:04:06]   冒烟（8 token）
+    CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0
+    CPU_RISCV64_SPACEMIT: alloc_chunk: open(/dev/tcm_sync_mem) failed, errno=2
+    CPU_RISCV64_SPACEMIT: failed to allocate init_barrier from shared mem, falling back to heap
+------------------------------------------------------------
+[20:04:50] 汇总
+[20:04:50]   日志: /home/a/cie/results/run_20261031_200303.log
+[20:04:50]   结果目录: /home/a/cie/results
+[20:04:50]   状态: 全部成功
+[20:04:50]   当前内存:   温度: 30C

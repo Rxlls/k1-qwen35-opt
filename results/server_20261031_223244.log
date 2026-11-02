@@ -1,0 +1,93 @@
+CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0
+CPU_RISCV64_SPACEMIT: alloc_chunk: open(/dev/tcm_sync_mem) failed, errno=2
+CPU_RISCV64_SPACEMIT: failed to allocate init_barrier from shared mem, falling back to heap
+0.00.017.863 I log_info: verbosity = 3 (adjust with the `-lv N` CLI arg)
+0.00.017.886 I device_info:
+0.00.017.951 I   - CPU     : Spacemit(R) X60 (7849 MiB, 7849 MiB free)
+0.00.018.321 I system_info: n_threads = 4 (n_threads_batch = 4) / 8 | CPU : RISCV_V = 1 | RVV_VLEN = 32 | LLAMAFILE = 1 | OPENMP = 1 | 
+0.00.018.353 I srv          main: n_parallel is set to auto, using n_parallel = 4 and kv_unified = true
+0.00.020.254 I srv          init: using 8 threads for HTTP server
+0.00.021.014 I srv         start: binding port with default address family
+0.00.022.744 I srv          main: loading model
+0.00.023.333 I srv    load_model: loading model '/home/a/cie/models/Qwen3.5-2B-Q4_0-self.gguf'
+0.00.023.506 I common_init_result: fitting params to device memory ...
+0.00.023.525 I common_init_result: (for bugs during this step try to reproduce them with -fit off, or provide --verbose logs if the bug only occurs with -fit on)
+0.04.440.670 I common_params_fit_impl: projected to use 1187 MiB of host memory vs. 7849 MiB of total host memory
+0.13.657.760 W llama_context: n_ctx_seq (8192) < n_ctx_train (262144) -- the full capacity of the model will not be utilized
+0.13.916.107 W common_init_from_params: warming up the model with an empty run - please wait ... (--no-warmup to disable)
+0.14.395.990 I srv    load_model: initializing slots, n_slots = 4
+0.14.861.601 W srv    load_model: speculative decoding will use checkpoints
+0.14.861.692 W common_speculative_init: no implementations specified for speculative decoding
+0.14.861.702 I slot   load_model: id  0 | task -1 | new slot, n_ctx = 8192
+0.14.861.737 I slot   load_model: id  1 | task -1 | new slot, n_ctx = 8192
+0.14.861.742 I slot   load_model: id  2 | task -1 | new slot, n_ctx = 8192
+0.14.861.745 I slot   load_model: id  3 | task -1 | new slot, n_ctx = 8192
+0.14.862.096 I srv    load_model: prompt cache is enabled, size limit: 8192 MiB
+0.14.862.116 I srv    load_model: use `--cache-ram 0` to disable the prompt cache
+0.14.862.121 I srv    load_model: for more info see https://github.com/ggml-org/llama.cpp/pull/16391
+0.14.862.258 I srv          init: idle slots will be saved to prompt cache and cleared upon starting a new task
+0.15.022.409 I init: chat template, example_format: '<|im_start|>system
+You are a helpful assistant<|im_end|>
+<|im_start|>user
+Hello<|im_end|>
+<|im_start|>assistant
+Hi there<|im_end|>
+<|im_start|>user
+How are you?<|im_end|>
+<|im_start|>assistant
+<think>
+'
+0.15.137.927 I srv          init: init: chat template, thinking = 1
+0.15.138.124 I srv          main: model loaded
+0.15.138.172 I srv          main: server is listening on http://127.0.0.1:8080
+0.15.138.204 I srv  update_slots: all slots are idle
+0.15.628.201 I slot get_availabl: id  3 | task -1 | selected slot by LRU, t_last = -1
+0.15.628.223 I srv  get_availabl: updating prompt cache
+0.15.628.242 I srv          load:  - looking for better prompt, base f_keep = -1.000, sim = 0.000
+0.15.628.263 I srv        update:  - cache state: 0 prompts, 0.000 MiB (limits: 8192.000 MiB, 8192 tokens, 8589934592 est)
+0.15.628.281 I srv  get_availabl: prompt cache update took 0.05 ms
+0.15.628.477 I slot launch_slot_: id  3 | task 0 | processing task, is_child = 0
+0.39.478.121 I slot print_timing: id  3 | task 0 |   text prefill =    1003.99 ms /     8 tokens (  125.50 ms per token,     7.97 tokens per second)
+0.39.478.172 I slot print_timing: id  3 | task 0 |         decode =   22845.53 ms /    64 tokens (  356.96 ms per token,     2.80 tokens per second)
+0.39.478.178 I slot print_timing: id  3 | task 0 |          total =   23849.52 ms /    72 tokens
+0.39.478.345 I slot      release: id  3 | task 0 | stop processing: n_tokens = 71, truncated = 0
+0.39.478.390 I srv  update_slots: all slots are idle
+0.39.843.349 I slot get_availabl: id  2 | task -1 | selected slot by LRU, t_last = -1
+0.39.843.372 I srv  get_availabl: updating prompt cache
+0.39.843.390 I srv          load:  - looking for better prompt, base f_keep = -1.000, sim = 0.000
+0.39.843.408 I srv        update:  - cache state: 0 prompts, 0.000 MiB (limits: 8192.000 MiB, 8192 tokens, 8589934592 est)
+0.39.843.414 I srv  get_availabl: prompt cache update took 0.04 ms
+0.39.843.524 I slot launch_slot_: id  2 | task 66 | processing task, is_child = 0
+0.39.843.529 I slot slot_save_an: id  3 | task -1 | saving idle slot to prompt cache
+0.39.843.687 W srv   prompt_save:  - saving prompt with length 71, total state size = 20.100 MiB (draft: 0.000 MiB)
+0.39.875.707 I slot prompt_clear: id  3 | task -1 | clearing prompt with 71 tokens
+0.39.875.909 I srv        update:  - cache state: 1 prompts, 20.100 MiB (limits: 8192.000 MiB, 8192 tokens, 28937 est)
+0.39.875.918 I srv        update:    - prompt 0x7cb980:      71 tokens, checkpoints:  0,    20.100 MiB
+1.14.729.921 I slot print_timing: id  2 | task 66 | prompt processing, n_tokens =    684, progress = 0.57, t =  34.85 s / 19.62 tokens per second
+1.14.768.562 I slot create_check: id  2 | task 66 | created context checkpoint 1 of 32 (pos_min = 683, pos_max = 683, n_tokens = 684, size = 19.266 MiB)
+1.41.700.240 I slot print_timing: id  2 | task 66 | prompt processing, n_tokens =   1196, progress = 1.00, t =  61.82 s / 19.35 tokens per second
+1.41.738.447 I slot create_check: id  2 | task 66 | created context checkpoint 2 of 32 (pos_min = 1195, pos_max = 1195, n_tokens = 1196, size = 19.266 MiB)
+1.54.522.411 I slot print_timing: id  2 | task 66 |   text prefill =   62445.99 ms /  1200 tokens (   52.04 ms per token,    19.22 tokens per second)
+1.54.522.459 I slot print_timing: id  2 | task 66 |         decode =   12200.36 ms /    32 tokens (  381.26 ms per token,     2.62 tokens per second)
+1.54.522.465 I slot print_timing: id  2 | task 66 |          total =   74646.35 ms /  1232 tokens
+1.54.522.781 I slot      release: id  2 | task 66 | stop processing: n_tokens = 1231, truncated = 0
+1.54.522.830 I srv  update_slots: all slots are idle
+1.54.603.089 I slot get_availabl: id  1 | task -1 | selected slot by LRU, t_last = -1
+1.54.603.107 I srv  get_availabl: updating prompt cache
+1.54.603.124 I srv          load:  - looking for better prompt, base f_keep = -1.000, sim = 0.000
+1.54.603.144 I srv        update:  - cache state: 1 prompts, 20.100 MiB (limits: 8192.000 MiB, 8192 tokens, 28937 est)
+1.54.603.189 I srv        update:    - prompt 0x7cb980:      71 tokens, checkpoints:  0,    20.100 MiB
+1.54.603.199 I srv  get_availabl: prompt cache update took 0.08 ms
+1.54.603.305 I slot launch_slot_: id  1 | task 101 | processing task, is_child = 0
+1.54.603.311 I slot slot_save_an: id  2 | task -1 | saving idle slot to prompt cache
+1.54.603.738 W srv   prompt_save:  - saving prompt with length 1231, total state size = 33.715 MiB (draft: 0.000 MiB)
+1.54.731.606 I slot prompt_clear: id  2 | task -1 | clearing prompt with 1231 tokens
+1.54.732.751 I srv        update:  - cache state: 2 prompts, 92.347 MiB (limits: 8192.000 MiB, 8192 tokens, 115498 est)
+1.54.732.788 I srv        update:    - prompt 0x7cb980:      71 tokens, checkpoints:  0,    20.100 MiB
+1.54.732.794 I srv        update:    - prompt 0x7d8a60:    1231 tokens, checkpoints:  2,    72.248 MiB
+2.20.278.874 I slot print_timing: id  1 | task 101 |   text prefill =    2703.35 ms /    42 tokens (   64.37 ms per token,    15.54 tokens per second)
+2.20.278.924 I slot print_timing: id  1 | task 101 |         decode =   22842.38 ms /    64 tokens (  356.91 ms per token,     2.80 tokens per second)
+2.20.278.930 I slot print_timing: id  1 | task 101 |          total =   25545.74 ms /   106 tokens
+2.20.279.067 I slot      release: id  1 | task 101 | stop processing: n_tokens = 105, truncated = 0
+2.20.279.110 I srv  update_slots: all slots are idle
+2.20.323.816 I srv    operator(): operator(): cleaning up before exit...

@@ -1,0 +1,19 @@
+[22:32:44] run_tomorrow 开始  stage=server  host=aa
+[22:32:44] 内存   磁盘 65G 可用
+------------------------------------------------------------
+[22:32:44] STAGE server — TTFT / 多轮（llama-server :8080）
+[22:32:44]   启动 llama-server
+[22:32:59]   就绪（15s）
+[22:32:59]   [1] 单轮短 prompt
+    单轮 prompt_n=8 prompt_tps=7.97 gen_n=64 gen_tps=2.80
+[22:33:23]   [2] 单轮长 prompt（约 1.5K）
+    长prompt prompt_n=1200 prompt_tps=19.22 gen_n=32 gen_tps=2.62
+[22:34:38]   [3] 多轮（第2轮命中 cache，观察 prompt_n 是否只剩增量）
+    多轮2 prompt_n=42 prompt_tps=15.54 gen_n=64 gen_tps=2.80
+[22:35:05]   server 已停止，结果 -> /home/a/cie/results/ttft_20261031_223244.txt
+------------------------------------------------------------
+[22:35:05] 汇总
+[22:35:05]   日志: /home/a/cie/results/run_20261031_223244.log
+[22:35:05]   结果目录: /home/a/cie/results
+[22:35:05]   状态: 全部成功
+[22:35:05]   当前内存:   温度: 30C
