@@ -85,7 +85,7 @@ bash ~/cie/tools/deploy.sh
 cd ~/cie/models
 ls -l Qwen3.5-2B-Q4_0-self.gguf Qwen3.5-4B-Q4_0-self.gguf
 sha256sum -c ~/cie/docs/hashes.txt          # 交付产物（需先有 hashes.txt）
-sha256sum -c ../docs/weights.sha256         # 原始权重 27 个文件（需先 00_fetch_models.sh）
+sha256sum -c ../docs/weights.sha256         # 原始权重 27 个文件（仅 x86 转换机；K1 上未跑 00_fetch_models.sh 时本项 N/A）
 python3 ~/cie/tools/gguf_types.py Qwen3.5-2B-Q4_0-self.gguf
 python3 ~/cie/tools/gguf_types.py --group Qwen3.5-2B-Q4_0-self.gguf
 python3 ~/cie/tools/gguf_types.py Qwen3.5-4B-Q4_0-self.gguf     # 期望 426 张量 / block_count 32
