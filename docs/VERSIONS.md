@@ -15,34 +15,40 @@
 | 包内清单 | rootfs.ext4(8GB) / bootfs.ext4(256MB) / env.bin / u-boot.itb / fw_dynamic.itb / factory/FSBL.bin / factory/bootinfo_emmc.bin 等16个文件 |
 | 校验日期 | 2026-10-28 |
 
-## 硬件平台（待刷机后用实测值补全）
+## 硬件平台（实测）
 
 | 项 | 值 |
 |---|---|
 | 机型 | 进迭时空K1笔记本（MUSE Book类），8GB LPDDR4x + 128GB NVMe存储 |
 | 内存 | 总量7.7GiB，LXQt桌面空闲时占用约1.3GiB、可用6.4GiB（2026-10-28实测）；**无swap** |
-| 存储 | 系统运行于**NVMe**：nvme0n1p6=/（119G ext4）、p5=/boot（256M）；lsblk未显示eMMC设备（仅SPI mtdblock0-5），待`ls /dev/mmcblk*`复核 |
+| 存储 | 系统运行于**NVMe**：`findmnt /` = `/dev/nvme0n1p6`（119G ext4）、p5=/boot（256M）；`ls /dev/mmcblk*` 无输出（2026-11-02 复核），`lsblk` 仅见 SPI 的 mtdblock0-5——**eMMC 未作为块设备暴露**，刷机包虽以 eMMC 命名，实际系统盘是 NVMe |
 | CPU | K1，8×X60；isa=rv64imafdcv_…_zvfh_zfh_…_ime——**v(RVV)、zvfh、ime(AI扩展)全部在位** |
 
-## 软件版本（刷机后补全）
+## 软件版本（实测）
 
 | 项 | 值 | 采集命令 |
 |---|---|---|
 | Bianbu版本 | 2.3.5（Noble Numbat，基于Ubuntu 24.04源码） | 2026-10-28实测 |
 | 内核 | 6.6.63 | 2026-10-28实测 |
 | 桌面环境 | LXQt（镜像即LXQt版；终端中XDG_CURRENT_DESKTOP未回显，属会话变量未继承，不影响判定） | 2026-10-28 |
-| GCC | 待记录 | `gcc --version` |
-| CMake | 待记录 | `cmake --version` |
-| Python | 待记录 | `python3 --version` |
-| llama.cpp-tools-spacemit | 待记录 | `dpkg -l \| grep llama` |
-| spacemit-tcm | 待记录 | `dpkg -l \| grep spacemit-tcm` |
+| GCC | 13.2.0（Bianbu 13.2.0-23ubuntu4bb4） | `gcc --version`（2026-11-02 实测） |
+| CMake | 3.28.3 | `cmake --version`（2026-11-02 实测） |
+| Python | 3.12.3 | `python3 --version`（2026-11-02 实测） |
+| llama.cpp-tools-spacemit | 0.1.1-bpo1+6（构建串 `17ce6aa`） | `dpkg -l \| grep llama` |
+| spacemit-tcm | 3.0.0-bpo1+2 | `dpkg -l \| grep spacemit-tcm` |
 
 ## 模型产物（GGUF，K1端 ~/models/）
 
-| 文件 | 量化 | 体积 | sha256 |
+| 文件 | 量化 | 体积（字节 / llama-bench 报表） | sha256 |
 |---|---|---|---|
-| Qwen3.5-2B-Q4_0.gguf | Q4_0 | 1.2GB（1.12GiB，1.88B参数） | cd70221bebaee0503e0f6717e174250cd7825aa88438b3aabec9ad55731d9bb1 |
-| Qwen3.5-4B-Q4_0.gguf | Q4_0 | 2.5GB（2.40GiB，4.21B参数） | 298fcb5fe7a77ccc79745ae24751560c5ac56874caff4bb39b1f2055bd72b8bb |
+| Qwen3.5-2B-Q4_0.gguf（官方） | Q4_0 | 1,214,873,856 B / 1.12 GiB | cd70221bebaee0503e0f6717e174250cd7825aa88438b3aabec9ad55731d9bb1 |
+| Qwen3.5-4B-Q4_0.gguf（官方） | Q4_0 | 2,583,221,408 B / 2.40 GiB | 298fcb5fe7a77ccc79745ae24751560c5ac56874caff4bb39b1f2055bd72b8bb |
+| **Qwen3.5-2B-Q4_0-self.gguf（交付）** | Q4_0 + embd Q8_0 | 1,325,654,048 B / 1.22 GiB | `6c8ccec26fd07701b0bc9ebe5032e4d3244d77e5d66a26e9788734f354b839d5` |
+| **Qwen3.5-4B-Q4_0-self.gguf（交付）** | Q4_0 + embd Q8_0 | 2,697,857,984 B / 2.50 GiB | `2d7abdb22dea7c117b738a199dc5866d6ee103a7946a7972ecfba886f279213e` |
+
+量化参数（两个自产文件相同）：`llama-quantize --token-embedding-type q8_0 <f16-nomtp.gguf> <out.gguf> Q4_0`，量化器为 v0.2.3 构建。
+校验：`cd ~/cie/models && sha256sum -c ~/cie/docs/hashes.txt`（2026-11-02 通过）。
+> **体积口径**：llama-bench 报表按 GiB 截断，比实际字节数少 0.01 GiB（如 1,325,654,048 B 报 1.22 GiB，实为 1.23 GiB）。精确核对请用 sha256，不要用体积。
 
 ## 正式基线 B1：厂商开箱版（llama.cpp 0.1.1 + Q4_0，2026-10-29）
 
@@ -122,7 +128,7 @@ cmake --install build
 | VPACK / VNPACK | Failed | IME2 不支持 |
 
 → 本机构建只能得到 `RISCV64_SPACEMIT_IME1`。官方检测逻辑要求 i4 vmadot + vpack/vnspack 同时具备才定义 IME2，且 GCC≥15 才会追加 `-march=..._xsmtvdotii`。
-**注意**：`use_ime2: 0` 的根因是编译器缺少 IME2 指令支持，**不是 TCM 故障**（此前判断需修正）。若要 IME2 需用 SpacemiT 官方交叉工具链（v1.2.4，含 GCC15）在 x86 上交叉编译；但 K1 的 core arch id 为 `a03c`、K3 为 `a064`，K1 是否具备 IME2 硬件支持尚待验证，优先级低于先把 IME1 基线跑正。
+**注意**：`use_ime2: 0` 的根因是编译器缺少 IME2 指令支持，**不是 TCM 故障**（此前判断需修正）。若要 IME2 需用 SpacemiT 官方交叉工具链（v1.2.4，含 GCC15）在 x86 上交叉编译；但 K1 的 core arch id 为 `a03c`、K3 为 `a064`，后续实测确认 K1 的运行时报 `use_ime2=0`（arch_id `a03c`），即硬件/工具链均不支持 IME2；该结论已并入技术文档 §8.2。
 
 ## 转换管线（2026-10-29 验证通过）
 
@@ -224,19 +230,32 @@ python convert_hf_to_gguf.py "$CIE\models\qwen3.5-4b" --outfile "$CIE\gguf\Qwen3
 
 **为何这个反差就是线索**：体积大了 8.9%，prefill 却快 88%。若差异来自算力或带宽，prefill 应当**下降**。实则上升近一倍 ⇒ 走的是完全不同的代码路径。
 
-**机制假设（待验证）**：prefill 每轮处理 512 token、decode 每轮 1 token，只有"按 token 数放大"的开销才会产生这种差异——即每层每 token 执行一次的小算子。最可能是 GDN 层的 `ssm_alpha`（仅16列）/`ssm_conv1d`/`ssm_norm`：官方 GGUF 将其压成 Q4_0，而 Q4_0 量化块为32列，16列张量装不进去，旧后端只能走逐元素反量化的退化路径；18个GDN层×512 token 使开销放大数百倍。自产文件因新版 quantize 的 **F16 回退**保留了这些小张量，直接命中快速路径。
+**机制（已证实，见技术文档 §8.4）**：prefill 每轮处理 512 token、decode 每轮 1 token，只有"按 token 数放大"的开销才会产生这种差异——即每层每 token 执行一次的小算子。最可能是 GDN 层的 `ssm_alpha`（仅16列）/`ssm_conv1d`/`ssm_norm`：官方 GGUF 将其压成 Q4_0，而 Q4_0 量化块为32列，16列张量装不进去，旧后端只能走逐元素反量化的退化路径；18个GDN层×512 token 使开销放大数百倍。自产文件因新版 quantize 的 **F16 回退**保留了这些小张量，直接命中快速路径。
 （验证受限于 K1 解析 GGUF tokenizer 数组过慢，单文件>11分钟未完成，暂缓。）
 
 **项目含义（报告主结论）**：
 官方推荐的 GGUF 在 K1 上被其自身的量化选择拖累，prefill 仅 10.84 t/s。自建转换量化管线（F16回退 + embedding Q8_0）在**相同运行时与硬件**上把 prefill 提升至 20.36 t/s（**+87.8%**），decode 持平。
 ⇒ 单一变量、归因干净的优化，同时覆盖「Prefill性能(20分)」「转换量化(5分)」「可量化优化(10分)」三项。
 
-## 待补全项（P0出口门前必须填齐）
+## 待补全项（2026-11-02 复核）
 
-- [x] 刷机后：Bianbu 2.3.5 / 内核6.6.63 / LXQt / isa含v+ime（2026-10-28实测）
-- [x] llama.cpp 包版本 0.1.1-bpo1+6（维护者@spacemit.com）、spacemit-tcm 3.0.0-bpo1+2
-- [ ] 自编译 llama.cpp 的 tag + commit（`git rev-parse HEAD`）
-- [ ] Qwen3.5-2B/4B原始权重：来源URL + 每个文件的sha256
-- [ ] 自产GGUF产物：量化参数 + sha256
-- [ ] spacemit-com/llama.cpp：tag（v0.2.3）+ commit
-- [ ] ggml-org/llama.cpp（B0基线）：commit
+| # | 项 | 状态 | 值 / 说明 |
+|---|---|---|---|
+| 1 | 刷机后系统信息 | ✅ 已完成 | Bianbu 2.3.5 / 内核 6.6.63 / LXQt / ISA 含 `v`+`zvfh`+`ime` |
+| 2 | 运行时与 TCM 包版本 | ✅ 已完成 | `0.1.1-bpo1+6`（维护者 @spacemit.com）/ `3.0.0-bpo1+2` |
+| 3 | 工具链版本 | ✅ 已完成 | GCC 13.2.0 / CMake 3.28.3 / Python 3.12.3（2026-11-02 实测） |
+| 4 | 自产 GGUF 量化参数 + sha256 | ✅ 已完成 | Q4_0 + `--token-embedding-type q8_0`；两个 sha256 见「模型产物」表 |
+| 5 | 自编译 llama.cpp 的 tag + commit | ⚠️ 只能部分 | tag `v0.2.3`（量化器，tarball 解包，目录内无 `.git`）；运行时 0.1.1 的构建串为 `17ce6aa`，tarball 无法反查完整 commit |
+| 6 | 原始权重来源 URL + 每个文件 sha256 | ⚠️ 只能部分 | URL 已知：ModelScope `Qwen/Qwen3.5-2B`（4.6 GB）、`Qwen/Qwen3.5-4B`（8.4 GB）；**原始 safetensors 的 sha256 未采集** |
+| 7 | ggml-org/llama.cpp（B0 基线）commit | ❌ 未记录 | B0 基线已弃用，全部结论不依赖它 |
+
+**剩余 3 项怎么办**
+
+- **#5**：不可补救（tarball 无版本库）。可追溯标识改用「构建串 `17ce6aa` + apt 包版本 `0.1.1-bpo1+6`」，这两项在 `llama-bench` 输出与 `dpkg -l` 里都能复核。
+- **#6**：若评审必查，重下后补录，约 30 分钟：
+  ```bash
+  modelscope download --model Qwen/Qwen3.5-2B --local_dir ~/cie/models/qwen3.5-2b
+  cd ~/cie/models/qwen3.5-2b && sha256sum *.safetensors
+  ```
+  当前可用的替代证据是 f16 中间产物的结构校验（张量数 335/441、`arch=qwen35`、`ctx=262144`，见「转换管线」一节）。
+- **#7**：建议直接从清单删除——留一个永远空的勾，比没有这一行更容易被追问。
