@@ -233,9 +233,14 @@ bash scripts/03_quantize.sh <f16-nomtp.gguf> Q4_0
 
 > 复跑成本：2B 约 2 分钟、4B 约 4 分钟（01+02+03 合计）。本次验证的 `gguf/v7/` 工作目录已清理，只保留两个 Q4_0 成品供比对。
 >
-> 本地 `gguf/` 根目录仍保留原始 f16/nomtp 中间件（约 27 GB），可手动删除。**注意**：旧版
-> `Qwen3.5-4B-f16-nomtp.gguf` 因 `strip_mtp.py` 的 `raw_shape` 转置缺陷已作废并删除（其 `token_embd` 为 `248320×2560`，
-> 正确应为 `2560×248320`）；如需 4B 中间件，请从 `01_convert.sh` 重新生成。
+> **中间件不需要删**：本地 `gguf/` 与 K1 的 `~/cie/models/` 各保留一份 f16/nomtp（本地约 27 GB），
+> 改量化参数时可跳过 `01`/`02` 直接量化。真要释放空间，删本地即可——重跑 `01_convert` + `02_strip_mtp`
+> 只需 2 分钟（2B）/ 4 分钟（4B），或从 K1 取回。
+>
+> ⚠ **同名的 nomtp 可能内容不同，跨机器复制必须校验形状而非体积**：本地 10-30 版
+> `Qwen3.5-4B-f16-nomtp.gguf` 的 `token_embd` 是 `248320×2560`（旧版 `strip_mtp.py` 的转置产物，已删除），
+> 而 K1 上同名文件是 `2560×248320`（正确）——两者都是 7.9 GB、名字一样。
+> 判定方法：`python3 tools/gguf_types.py <file> | grep token_embd`，正确值应为 `(2560, 248320)`。
 
 **常见问题**：`SPERT_DIR is not set`（要用 `-DGGML_SPACEMIT=ON -DSPERT_DIR=…`，不是废弃的 `GGML_CPU_RISCV64_SPACEMIT`）；`unknown type name 'vfloat16m2_t'`（K1 本机 GCC 13 缺 Zvfh，必须交叉编译）；`ncols 16 not divisible by 32`（0.1.1 量化器无小张量回退，用 v0.2.3）。
 
