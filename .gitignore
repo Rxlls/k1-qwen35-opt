@@ -66,3 +66,10 @@ llama011-patched.tar.gz
 
 # Word 占用时另存的待替换版本
 docs/*.new.docx
+
+# ============================================
+# 发布包与清单（由 tools/make_release.py 生成）
+# ============================================
+dist/
+MANIFEST.txt
+MANIFEST.sha256
