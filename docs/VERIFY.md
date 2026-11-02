@@ -12,7 +12,7 @@
 |---|---|---|---|---|
 | V1 | 仓库与交付物完整性 | 文件清单、可执行位、行尾、体积 | 1 min | 6 项交付物齐全，脚本 755，无 CRLF |
 | V2 | 环境与依赖 | `deploy.sh check` + 依赖包 + 传感器 | 1~4 min | 14 或 15 项全绿（见下） |
-| V3 | 产物正确性 | 体积 + sha256 + GGUF 结构 | 2 min | sha256 一致；320 张量、nextn=0；非白名单 ≤1 |
+| V3 | 产物正确性 | 体积 + sha256 + GGUF 结构 | 2 min | sha256 一致；张量数 2B 320 / 4B 426、nextn=0；非白名单 ≤1 |
 | V4 | 功能正确性 | 冒烟出字（2B/4B） | 2 min | 中文无乱码；≥2.6 / ≥1.3 t/s |
 | V5 | 性能一致性 | `llama-bench` 对照基线 | 10 min | 2B pp512 ≥19.7；4B ≥7.86（±3%） |
 | V6 | 文档一致性 | AUDIT 清单 + 数字抽检 | 5 min | 无"文档有、归档无"的数字 |
@@ -88,13 +88,14 @@ sha256sum -c ~/cie/docs/hashes.txt          # 交付产物（需先有 hashes.tx
 sha256sum -c ../docs/weights.sha256         # 原始权重 27 个文件（需先 00_fetch_models.sh）
 python3 ~/cie/tools/gguf_types.py Qwen3.5-2B-Q4_0-self.gguf
 python3 ~/cie/tools/gguf_types.py --group Qwen3.5-2B-Q4_0-self.gguf
+python3 ~/cie/tools/gguf_types.py Qwen3.5-4B-Q4_0-self.gguf     # 期望 426 张量 / block_count 32
 ```
 
 **判断标准**：
 
 | 项 | 2B 自产 | 4B 自产 |
 |---|---|---|
-| 张量总数 | 320 | 320 |
+| 张量总数 | 320 | **426** |
 | `block_count` | 24 | 32 |
 | `nextn_predict_layers` | 0 | 0 |
 | 类型分布 | `{'F32':133,'Q8_0':1,'Q4_0':186}` | 同构（数量按层数放大） |
@@ -143,10 +144,13 @@ llama-cli -m ~/cie/models/Qwen3.5-4B-Q4_0-self.gguf -p 你好 -n 40 -c 1024 -t 4
 
 ```bash
 # 官方 vs 自产（同一进程跑两次，避免环境漂移）
-llama-bench -m ~/cie/models/Qwen3.5-2B-Q4_0.gguf      -t 4 -p 64,512 -n 128 -fa 1 -r 3
-llama-bench -m ~/cie/models/Qwen3.5-2B-Q4_0-self.gguf -t 4 -p 64,512 -n 128 -fa 1 -r 3
+llama-bench -m ~/cie/models/Qwen3.5-2B-Q4_0.gguf      -t 4 -p 64,512 -n 128 -fa 1 -mmp 0 -r 3
+llama-bench -m ~/cie/models/Qwen3.5-2B-Q4_0-self.gguf -t 4 -p 64,512 -n 128 -fa 1 -mmp 0 -r 3
+# 4B 同样口径（-r 2，与归档一致）
+llama-bench -m ~/cie/models/Qwen3.5-4B-Q4_0.gguf      -t 4 -p 64,512 -n 128 -fa 1 -mmp 0 -r 2
+llama-bench -m ~/cie/models/Qwen3.5-4B-Q4_0-self.gguf -t 4 -p 64,512 -n 128 -fa 1 -mmp 0 -r 2
 # 长上下文
-llama-bench -m ~/cie/models/Qwen3.5-2B-Q4_0-self.gguf -t 4 -p 512 -n 64 -d 0,4096,8192 -fa 1 -r 2
+llama-bench -m ~/cie/models/Qwen3.5-2B-Q4_0-self.gguf -t 4 -p 512 -n 64 -d 0,4096,8192 -fa 1 -mmp 0 -r 2
 ```
 
 **判断标准**（±3% 内视为一致）：

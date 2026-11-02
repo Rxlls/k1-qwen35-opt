@@ -109,6 +109,7 @@ def main():
         payload += ["MANIFEST.txt", "MANIFEST.sha256"]
 
     os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
+    crlf_fixed = []
     with zipfile.ZipFile(args.out, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as z:
         for rel in payload:
             full = os.path.join(ROOT, rel)
@@ -121,7 +122,13 @@ def main():
             mode = 0o755 if rel.endswith((".sh", ".py")) else 0o644
             zi.external_attr = mode << 16
             with open(full, "rb") as fp:
-                z.writestr(zi, fp.read(), compresslevel=9)
+                data = fp.read()
+            # 文本脚本强制 LF：Windows 工作区出现 CRLF 时，包里若照搬，
+            # 在 Linux 上执行会报 $'\r': command not found。改内存不改磁盘。
+            if rel.endswith((".sh", ".py")) and b"\r\n" in data:
+                crlf_fixed.append((rel, data.count(b"\r\n")))
+                data = data.replace(b"\r\n", b"\n")
+            z.writestr(zi, data, compresslevel=9)
 
     size = os.path.getsize(args.out)
     with zipfile.ZipFile(args.out) as z:
@@ -134,6 +141,10 @@ def main():
         print("完整性校验失败：%s" % bad)
         return 1
     print("完整性：OK（zip 自检通过）")
+    if crlf_fixed:
+        print("已自动转为 LF（仅包内，未改磁盘）：")
+        for rel, n in crlf_fixed:
+            print("  %-30s %d 行" % (rel, n))
 
     # 清理临时生成的清单（它们已进包；是否入库由使用者决定）
     for f in ("MANIFEST.txt", "MANIFEST.sha256"):
