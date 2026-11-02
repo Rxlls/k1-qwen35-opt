@@ -170,6 +170,43 @@ check_models() {
     (cd "$MODELS" && sha256sum -c "$CIE/docs/hashes.txt" 2>&1 | tail -3) \
       && ok "sha256 校验通过" || warn "sha256 校验有差异，请核对"
   fi
+
+  check_intermediates
+}
+
+# ------------------------------------------------------------
+# 中间件形状校验（不计入通过/失败项数——中间件不是交付物）
+#
+# 正常的 token_embd.weight 是 (n_embd, n_vocab)，n_embd 远小于 n_vocab
+# （本项目 2B 为 2048×248320、4B 为 2560×248320）。若第一维 > 第二维，
+# 说明被旧版 strip_mtp.py 的 raw_shape 缺陷转置过——这种文件体积正常、
+# 名字正常、哈希也能算，只有加载时才报 wrong shape。详见 docs/DEPLOY.md §2.5。
+check_intermediates() {
+  local dir f line a b n=0 badn=0
+  for dir in "$MODELS" "$CIE/gguf"; do
+    [ -d "$dir" ] || continue
+    for f in "$dir"/*f16*.gguf; do
+      [ -f "$f" ] || continue
+      n=$((n + 1))
+      line=$(python3 "$CIE/tools/gguf_types.py" "$f" 2>/dev/null | grep "token_embd.weight" | head -1)
+      a=$(printf '%s' "$line" | sed -nE 's/.*\(([0-9]+),[[:space:]]*([0-9]+)\).*/\1/p')
+      b=$(printf '%s' "$line" | sed -nE 's/.*\(([0-9]+),[[:space:]]*([0-9]+)\).*/\2/p')
+      if [ -z "$a" ] || [ -z "$b" ]; then
+        warn "$(basename "$f")：读不到 token_embd 形状（跳过）"
+        continue
+      fi
+      if [ "$a" -gt "$b" ]; then
+        warn "$(basename "$f")：token_embd ($a, $b) 疑似转置，不可用于量化（正确应为 ($b, $a)）"
+        badn=$((badn + 1))
+      fi
+    done
+  done
+  [ "$n" -eq 0 ] && return 0
+  if [ "$badn" -eq 0 ]; then
+    echo "  [OK]   中间件 $n 个，token_embd 形状正常（不计入项数）"
+  else
+    echo "         共 $n 个中间件，其中 $badn 个形状异常（仅提示，不计入项数）"
+  fi
 }
 
 # ------------------------------------------------------------
