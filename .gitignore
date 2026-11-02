@@ -73,3 +73,6 @@ docs/*.new.docx
 dist/
 MANIFEST.txt
 MANIFEST.sha256
+
+# slidep 工作缓存
+.slidep/
