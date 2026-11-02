@@ -237,7 +237,7 @@ python convert_hf_to_gguf.py "$CIE\models\qwen3.5-4b" --outfile "$CIE\gguf\Qwen3
 官方推荐的 GGUF 在 K1 上被其自身的量化选择拖累，prefill 仅 10.84 t/s。自建转换量化管线（F16回退 + embedding Q8_0）在**相同运行时与硬件**上把 prefill 提升至 20.36 t/s（**+87.8%**），decode 持平。
 ⇒ 单一变量、归因干净的优化，同时覆盖「Prefill性能(20分)」「转换量化(5分)」「可量化优化(10分)」三项。
 
-## 待补全项（2026-11-02 复核）
+## 待补全项（2026-11-02 复核，已全部关闭）
 
 | # | 项 | 状态 | 值 / 说明 |
 |---|---|---|---|
@@ -245,14 +245,20 @@ python convert_hf_to_gguf.py "$CIE\models\qwen3.5-4b" --outfile "$CIE\gguf\Qwen3
 | 2 | 运行时与 TCM 包版本 | ✅ 已完成 | `0.1.1-bpo1+6`（维护者 @spacemit.com）/ `3.0.0-bpo1+2` |
 | 3 | 工具链版本 | ✅ 已完成 | GCC 13.2.0 / CMake 3.28.3 / Python 3.12.3（2026-11-02 实测） |
 | 4 | 自产 GGUF 量化参数 + sha256 | ✅ 已完成 | Q4_0 + `--token-embedding-type q8_0`；两个 sha256 见「模型产物」表 |
-| 5 | 自编译 llama.cpp 的 tag + commit | ⚠️ 只能部分 | tag `v0.2.3`（量化器，tarball 解包，目录内无 `.git`）；运行时 0.1.1 的构建串为 `17ce6aa`，tarball 无法反查完整 commit |
+| 5 | llama.cpp 源码的 tag + commit | ✅ 已完成 | 运行时（apt 0.1.1-bpo1+6）与 TCM patch 版同源：tag `spacemit-llama.cpp.riscv64.0.1.1` = commit **`17ce6aa07bd38057040ca43da8660ee496c3cb6d`**（2026-05-22，merge PR #4）；量化器 tag `v0.2.3` = commit **`6df9f7504da153d49c37887f895b2aca2baf8676`** |
 | 6 | 原始权重来源 URL + 每个文件 sha256 | ✅ 已完成 | ModelScope `Qwen/Qwen3.5-2B` / `Qwen/Qwen3.5-4B`；27 个文件的 sha256 见 [`docs/weights.sha256`](weights.sha256)（2026-11-02 采集并自检通过） |
-| 7 | ggml-org/llama.cpp（B0 基线）commit | ❌ 未记录 | B0 基线已弃用，全部结论不依赖它 |
 
-**剩余 2 项怎么办**
+**清单已全部关闭。** 其中 #5 一度被判为"不可补救"，实际是可以查的——源码目录是 tarball 解包、没有 `.git`，但**上游 tag 仍在**，直接问远端即可：
 
-- **#5**：不可补救（tarball 无版本库）。可追溯标识改用「构建串 `17ce6aa` + apt 包版本 `0.1.1-bpo1+6`」，这两项在 `llama-bench` 输出与 `dpkg -l` 里都能复核。
-- **#7**：建议直接从清单删除——留一个永远空的勾，比没有这一行更容易被追问。
+```bash
+git ls-remote --tags https://github.com/spacemit-com/llama.cpp | grep -E '0\.1\.1|v0\.2\.3'
+# 17ce6aa07bd38057040ca43da8660ee496c3cb6d  refs/tags/spacemit-llama.cpp.riscv64.0.1.1
+# 6df9f7504da153d49c37887f895b2aca2baf8676  refs/tags/v0.2.3
+```
+
+交叉验证：apt 二进制 `llama-bench` 打印的构建串是 `17ce6aa`，与上面 tag 指向的 commit 前 7 位完全一致；该 commit 日期 2026-05-22，与包构建时间 `Fri, 22 May 2026 19:08:52 +0800` 同日。⇒ **运行时 0.1.1、TCM patch 版、量化器三者的来源都可追溯到具体 commit。**
+
+（原 #7「ggml-org/llama.cpp B0 基线 commit」已删除：B0 基线弃用，全部结论不依赖它。）
 
 ---
 
