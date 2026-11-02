@@ -246,16 +246,31 @@ python convert_hf_to_gguf.py "$CIE\models\qwen3.5-4b" --outfile "$CIE\gguf\Qwen3
 | 3 | 工具链版本 | ✅ 已完成 | GCC 13.2.0 / CMake 3.28.3 / Python 3.12.3（2026-11-02 实测） |
 | 4 | 自产 GGUF 量化参数 + sha256 | ✅ 已完成 | Q4_0 + `--token-embedding-type q8_0`；两个 sha256 见「模型产物」表 |
 | 5 | 自编译 llama.cpp 的 tag + commit | ⚠️ 只能部分 | tag `v0.2.3`（量化器，tarball 解包，目录内无 `.git`）；运行时 0.1.1 的构建串为 `17ce6aa`，tarball 无法反查完整 commit |
-| 6 | 原始权重来源 URL + 每个文件 sha256 | ⚠️ 只能部分 | URL 已知：ModelScope `Qwen/Qwen3.5-2B`（4.6 GB）、`Qwen/Qwen3.5-4B`（8.4 GB）；**原始 safetensors 的 sha256 未采集** |
+| 6 | 原始权重来源 URL + 每个文件 sha256 | ✅ 已完成 | ModelScope `Qwen/Qwen3.5-2B` / `Qwen/Qwen3.5-4B`；27 个文件的 sha256 见 [`docs/weights.sha256`](weights.sha256)（2026-11-02 采集并自检通过） |
 | 7 | ggml-org/llama.cpp（B0 基线）commit | ❌ 未记录 | B0 基线已弃用，全部结论不依赖它 |
 
-**剩余 3 项怎么办**
+**剩余 2 项怎么办**
 
 - **#5**：不可补救（tarball 无版本库）。可追溯标识改用「构建串 `17ce6aa` + apt 包版本 `0.1.1-bpo1+6`」，这两项在 `llama-bench` 输出与 `dpkg -l` 里都能复核。
-- **#6**：若评审必查，重下后补录，约 30 分钟：
-  ```bash
-  modelscope download --model Qwen/Qwen3.5-2B --local_dir ~/cie/models/qwen3.5-2b
-  cd ~/cie/models/qwen3.5-2b && sha256sum *.safetensors
-  ```
-  当前可用的替代证据是 f16 中间产物的结构校验（张量数 335/441、`arch=qwen35`、`ctx=262144`，见「转换管线」一节）。
 - **#7**：建议直接从清单删除——留一个永远空的勾，比没有这一行更容易被追问。
+
+---
+
+## 原始权重校验值（补充：原「待补全项 #6」）
+
+来源：ModelScope `Qwen/Qwen3.5-2B`（4.6 GB）与 `Qwen/Qwen3.5-4B`（8.4 GB），HF 格式，各含 1 / 2 个 safetensors 分片。
+**全部 27 个文件**（权重分片 + config/tokenizer/template 等）的 sha256 见 `docs/weights.sha256`。
+
+| 文件 | 字节数 | sha256 |
+|---|---|---|
+| 2B `model.safetensors-00001-of-00001` | 4,548,221,488 | `aa33250c4fc64891ddfaba3a314fd9542ea371843c387178b425fbcc5ed680b1` |
+| 4B `model.safetensors-00001-of-00002` | 5,329,398,688 | `26a93f066e1916adb13453dae5a0c707c0fbc71299ed98779571a907b8e74c61` |
+| 4B `model.safetensors-00002-of-00002` | 3,990,429,408 | `cb544bd9bfae93dc59b0f22b292f5933573854a7f9b97835c67060d7d910e188` |
+
+复核方法（权重目录下执行）：
+
+```bash
+cd ~/cie/models && sha256sum -c ../docs/weights.sha256     # 27 项应全部 OK
+```
+
+> 说明：ModelScope 会在目录里放 `.msc`、`.mv` 两个下载元数据文件，它们不属于模型内容，未纳入清单。
