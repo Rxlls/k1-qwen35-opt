@@ -152,6 +152,8 @@ python3 tools/strip_mtp.py in-f16.gguf out-f16-nomtp.gguf
 4B 应对应 `block_count=32 / tensors=426`。
 
 > 实现要点：`gguf.GGUFWriter.add_tensor()` 的 `raw_shape` 参数期望 **numpy 顺序（维数倒序）**。若传入 ggml 顺序会被再倒一次，导致全部二维张量转置，加载时报 `tensor 'token_embd.weight' has wrong shape; expected 2048, 248320, got 248320, 2048`。`tools/strip_mtp.py` 已处理并附带形状与字节级校验。
+>
+> **不要跨版本、跨机器复用 `*-f16-nomtp.gguf`**：中间产物的正确性取决于生成它时那一版 `strip_mtp.py`。旧版本带有上述转置缺陷，用它生成的 nomtp 再量化，会得到"体积正常、维度错误"的 GGUF——文件大小对得上、sha256 也算得出来，只有加载时才暴露。2026-11-02 的跨平台复现即踩到此坑：本地遗留的 4B nomtp 中间件导致维度转置，用当前脚本重跑 `02_strip_mtp.sh` 后恢复（441→426、33→32、nextn 1→0）。**每次转换都从 `01_convert.sh` 产出的 f16 重新剥，不要复用旧 nomtp。**
 
 ### 2.4 构建量化器（v0.2.3）
 
