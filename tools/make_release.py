@@ -104,7 +104,7 @@ def main():
     payload = list(files)
     if not args.no_manifest:
         n, total = build_manifest(files, commit, os.path.join(ROOT, "MANIFEST.txt"))
-        print("清单：%d 个文件，%.2f MB" % (n, total))
+        print("清单：%d 个文件，%.2f MB" % (n, total / 1048576))
         payload += ["MANIFEST.txt", "MANIFEST.sha256"]
 
     os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
