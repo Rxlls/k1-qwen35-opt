@@ -187,7 +187,7 @@ ls ~/cie/results/ | wc -l                                   # 归档文件数（
 sed -n '1,40p' docs/AUDIT.md                                # 未闭环项清单
 ```
 
-**判断标准**：`docs/AUDIT.md` 中"仍未闭环"只剩 32K 内存一项；无"文档有值、归档无文件"的数字；图 5/6/7/8 与正文一致。
+**判断标准**：`docs/AUDIT.md` 第 4 节应为「已全部闭环（0 处）」；无「文档有值、归档无文件」的数字；图 5/6/7/8 与正文一致。
 
 **常见问题**：
 
@@ -198,7 +198,7 @@ sed -n '1,40p' docs/AUDIT.md                                # 未闭环项清单
 
 ---
 
-## 8. V7 可复现性（可选，40–60 min，在 x86 上做）
+## 8. V7 可复现性（可选，4–6 min，在 x86 上做）
 
 ```bash
 bash scripts/00_fetch_models.sh 2b
@@ -231,7 +231,11 @@ bash scripts/03_quantize.sh <f16-nomtp.gguf> Q4_0
 2. **x86 侧是确定性的**：同一条链在 WSL（Ubuntu 24.04 + 自建 `llama-quantize`）与本机 Windows（`.venv` + 同一二进制）各跑一次，2B 都得到 `e6b6653f9e61…dbed07`、4B 都得到 `1b9bf46f21fe…bd988b2`——**逐位相同**。所以 sha256 差异只存在于架构之间，不是随机噪声。
 3. **不要跨版本复用 `*-f16-nomtp.gguf`**：旧版 `strip_mtp.py` 的 `raw_shape` 缺陷会让二维张量转置——体积正常、哈希也算得出，只有加载时才报 `wrong shape`。本次 4B 首次即踩到此坑，从 01 重新生成后恢复（详见 `DEPLOY.md` §2.5）。
 
-> 复跑成本：2B 约 2 分钟、4B 约 4 分钟（01+02+03 合计）。中间产物（f16 / nomtp）随时可删——本次验证后已清理，只保留两个 Q4_0 成品供比对。
+> 复跑成本：2B 约 2 分钟、4B 约 4 分钟（01+02+03 合计）。本次验证的 `gguf/v7/` 工作目录已清理，只保留两个 Q4_0 成品供比对。
+>
+> 本地 `gguf/` 根目录仍保留原始 f16/nomtp 中间件（约 27 GB），可手动删除。**注意**：旧版
+> `Qwen3.5-4B-f16-nomtp.gguf` 因 `strip_mtp.py` 的 `raw_shape` 转置缺陷已作废并删除（其 `token_embd` 为 `248320×2560`，
+> 正确应为 `2560×248320`）；如需 4B 中间件，请从 `01_convert.sh` 重新生成。
 
 **常见问题**：`SPERT_DIR is not set`（要用 `-DGGML_SPACEMIT=ON -DSPERT_DIR=…`，不是废弃的 `GGML_CPU_RISCV64_SPACEMIT`）；`unknown type name 'vfloat16m2_t'`（K1 本机 GCC 13 缺 Zvfh，必须交叉编译）；`ncols 16 not divisible by 32`（0.1.1 量化器无小张量回退，用 v0.2.3）。
 
