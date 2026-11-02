@@ -258,7 +258,10 @@ git ls-remote --tags https://github.com/spacemit-com/llama.cpp | grep -E '0\.1\.
 
 交叉验证：apt 二进制 `llama-bench` 打印的构建串是 `17ce6aa`，与上面 tag 指向的 commit 前 7 位完全一致；该 commit 日期 2026-05-22，与包构建时间 `Fri, 22 May 2026 19:08:52 +0800` 同日。⇒ **运行时 0.1.1、TCM patch 版、量化器三者的来源都可追溯到具体 commit。**
 
-（原 #7「ggml-org/llama.cpp B0 基线 commit」已删除：B0 基线弃用，全部结论不依赖它。）
+（原 #7「ggml-org/llama.cpp B0 基线 commit」已删除。准确地说不是"弃用"，而是**从未实施**：
+B0（社区主线）需单独交叉编译约 2 小时，且不满足赛题"必须使用进迭时空开源 llama.cpp"的硬性要求，
+优先级排在 B2 之后，最终没做。没有实验就没有版本可固化，这一项在"版本固化清单"里没有对象可记——
+技术文档 §7 与 §11.3 已如实标注"未实施、不做任何推断"，答辩口径（DEFENSE 第 3 条）也已准备。）
 
 ---
 
