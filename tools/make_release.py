@@ -18,6 +18,7 @@ import hashlib
 import os
 import subprocess
 import sys
+import tarfile
 import time
 import zipfile
 
@@ -137,6 +138,15 @@ def main():
 
     print("输出：%s" % args.out)
     print("内容：%d 个文件，压缩后 %.2f MB" % (len(names), size / 1048576))
+
+    # 同时生成 tar.gz：zip 的 UTF-8 标志在旧版 Info-ZIP（<=6.00，Debian/Ubuntu 默认）
+    # 下不被识别，中文文件名会变乱码、sha256 -c 读不到。tar 不做编码转换，任何平台都正确。
+    tar_path = args.out[:-4] + ".tar.gz" if args.out.endswith(".zip") else args.out + ".tar.gz"
+    with tarfile.open(tar_path, "w:gz", format=tarfile.PAX_FORMAT) as tf:
+        for rel in payload:
+            tf.add(os.path.join(ROOT, rel), arcname=rel)
+    tsize = os.path.getsize(tar_path)
+    print("备选：%s（%.2f MB，中文名在任何平台都正确）" % (tar_path, tsize / 1048576))
     if bad:
         print("完整性校验失败：%s" % bad)
         return 1
