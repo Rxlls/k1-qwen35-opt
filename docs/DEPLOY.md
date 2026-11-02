@@ -266,7 +266,7 @@ bash ~/cie/tools/bench_quick.sh Qwen3.5-2B-Q4_0-self.gguf my_tag
 | `-t` | **4** | 不指定会崩溃（§5.1） |
 | `-fa` | `1`（bench）/ `on`（v0.2.3） | FlashAttention，长上下文必需 |
 | `-mmp` | `0`（v0.2.3 起改为 `-lm none`） | 关 mmap，避免页缺失干扰测量 |
-| `-c` | 2048~32768 | 32K 实测峰值内存 2B=1.74 GiB / 4B=3.57 GiB（1,825,620 / 3,746,296 KB） |
+| `-c` | 2048~32768 | 32K 实测峰值内存：2B 1.74 GiB、4B 官方 3.57 GiB、4B 自产 3.68 GiB（1,825,104 / 3,745,812 / 3,857,868 KB，2026-11-02 复测） |
 | `--chat-template-kwargs` | `{"enable_thinking":false}` | 仅 `llama-cli -cnv` / `llama-server` 需要；`llama-bench` 不走模板，无需 |
 
 ---
@@ -479,5 +479,5 @@ sha256sum models/*.gguf              # 产物校验值
 | decode 带宽天花板 | 有效带宽 3.4 GB/s ≈ 峰值 32% | 2B 实测 tg 2.80 t/s，未优化内存访问效率 |
 | 长 prompt 首字延迟 | 1200 token ≈ 62 s | 长文档问答不可用 |
 | KV cache 量化 | 不可行 | q8_0 使注意力路径掉出 IME，31 min 未完成（f16 仅 17.9 min） |
-| 4B 在 256K 上下文 | 内存不足 | 32K 峰值 3.57 GiB，外推 256K 需约 10.5 GiB > 8 GiB |
+| 4B 在 256K 上下文 | 内存不足 | 32K 峰值 3.57~3.68 GiB，外推 256K 需约 10.6 GiB > 8 GiB |
 | IME2 指令 | 不可用 | K1 的 X60 不支持，运行时报 `use_ime2=0` |
