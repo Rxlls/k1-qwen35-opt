@@ -36,7 +36,7 @@
 ## 复现
 
 ```bash
-# 在 K1 上：自动开终端、抓帧、编码（2B 约 4 分钟，4B 约 8 分钟）
+# 在 K1 上：自动开终端、抓帧、编码（2B 约 4 分钟，4B 约 10 分钟）
 bash tools/record_ab.sh /tmp/k1_ab_2b.mp4 2b 0.23
 bash tools/record_ab.sh /tmp/k1_ab_4b.mp4 4b 0.23
 
