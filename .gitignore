@@ -76,3 +76,4 @@ MANIFEST.sha256
 
 # slidep 工作缓存
 .slidep/
+**/.slidep/
