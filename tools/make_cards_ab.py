@@ -1,4 +1,13 @@
-"""对照视频的片头 / 片尾卡片（数据取本次实录画面值，并注明与归档值的差异来源）。"""
+"""对照视频的片头 / 片尾卡片。
+
+用法：
+    python tools/make_cards_ab.py 2b                      # 用 2B 实测默认值
+    python tools/make_cards_ab.py 4b --pa 3.2 --pb 7.0 --ga 1.3 --gb 1.4 --gain +118%
+
+数据取本次实录画面值；片尾同时注明与无录制归档值的差异来源。
+"""
+import argparse
+
 from PIL import Image, ImageDraw, ImageFont
 
 W, H = 1280, 720
@@ -10,6 +19,16 @@ RED = (192, 57, 43)
 
 BOLD = "C:/Windows/Fonts/msyhbd.ttc"
 REG = "C:/Windows/Fonts/msyh.ttc"
+
+# 各规模的默认（本次实录测得）与归档值
+PRESET = {
+    "2b": dict(pa="10.3", pb="18.9", ga="2.9", gb="2.8", gain="+83.5%",
+               arch="10.84 → 20.36", arch_gain="+87.8%",
+               note="decode 基本不变（2.9 / 2.8），收益集中在 prefill —— 与机制分析一致。"),
+    "4b": dict(pa="3.6", pb="7.4", ga="1.3", gb="1.4", gain="+105.6%",
+               arch="3.80 → 8.10", arch_gain="+113.2%",
+               note="decode 同时小幅上升（1.3 → 1.4），但方向随模型规模翻转，不计入成果。"),
+}
 
 
 def f(p, s):
@@ -24,11 +43,11 @@ def base():
     return img, d
 
 
-def title(path):
+def title(path, model="2B"):
     img, d = base()
     d.text((84, 130), "对照实验", font=f(BOLD, 76), fill=INK)
-    d.text((86, 240), "同一段 534 token 提示词 · 官方 Q4_0 vs 自产 Q4_0", font=f(REG, 30), fill=GRAY)
-    d.line([86, 306, 700, 306], fill=BLUE, width=4)
+    d.text((86, 240), f"Qwen3.5-{model} · 同一段 534 token 提示词 · 官方 vs 自产", font=f(REG, 30), fill=GRAY)
+    d.line([86, 306, 760, 306], fill=BLUE, width=4)
     d.text((86, 348), "K1 · Bianbu 2.3.5 · riscv64 · 4 核 1.6 GHz · llama.cpp 0.1.1",
            font=f(REG, 24), fill=GRAY)
     d.text((86, 396), "只换 GGUF 文件，运行时、线程数、参数完全相同", font=f(REG, 24), fill=GRAY)
@@ -39,18 +58,20 @@ def title(path):
     return path
 
 
-def end(path, prompt_a="9.8", prompt_b="17.7", gen_a="2.6", gen_b="2.7", gain="+80.6%"):
+def end(path, model="2B", pa="9.8", pb="17.7", ga="2.6", gb="2.7", gain="+80.6%",
+        arch="10.84 → 20.36", arch_gain="+87.8%", note=""):
     img, d = base()
     d.text((84, 70), "对照结果", font=f(BOLD, 54), fill=INK)
-    d.text((86, 148), "同一提示词、同一运行时，只替换量化文件", font=f(REG, 26), fill=GRAY)
+    d.text((86, 148), f"Qwen3.5-{model} · 同一提示词、同一运行时，只替换量化文件",
+           font=f(REG, 26), fill=GRAY)
 
     # 四列：型号 / prefill / decode / 相对提升
     d.text((430, 196), "prefill（Prompt）", font=f(REG, 21), fill=GRAY)
     d.text((650, 196), "decode（Generation）", font=f(REG, 21), fill=GRAY)
     d.text((890, 196), "相对 A", font=f(REG, 21), fill=GRAY)
 
-    rows = [("A · 官方 Q4_0", prompt_a, gen_a, "—", GRAY),
-            ("B · 自产 Q4_0", prompt_b, gen_b, gain, BLUE)]
+    rows = [("A · 官方 Q4_0", pa, ga, "—", GRAY),
+            ("B · 自产 Q4_0", pb, gb, gain, BLUE)]
     y = 228
     for name, pv, gv, gain_txt, col in rows:
         d.rectangle([86, y, W - 86, y + 104], fill=LIGHT)
@@ -64,16 +85,30 @@ def end(path, prompt_a="9.8", prompt_b="17.7", gen_a="2.6", gen_b="2.7", gain="+
                fill=RED if gain_txt != "—" else (150, 160, 175))
         y += 120
 
-    d.text((86, 496), "注：录制时每 0.14 s 抓一帧、约占 1 核，绝对值低于无录制归档值"
-                      "（10.84 → 20.36，+87.8%）；", font=f(REG, 19), fill=(140, 152, 168))
-    d.text((86, 524), "      decode 基本不变（2.6 / 2.7），收益集中在 prefill —— 与机制分析一致。",
-           font=f(REG, 19), fill=(140, 152, 168))
-    d.text((86, H - 92), "归档：results/bench_2b_q4_0_self_191113.txt · docs/技术文档.md §8.1",
+    d.text((86, 496), "注：录制时每 0.35 s 抓一帧（约占 1/3 核），画面值略低于无录制归档值"
+                      f"（{arch}，{arch_gain}）；", font=f(REG, 19), fill=(140, 152, 168))
+    d.text((86, 524), "      " + note, font=f(REG, 19), fill=(140, 152, 168))
+    d.text((86, H - 92), "归档：results/ · docs/技术文档.md §8.1",
            font=f(REG, 20), fill=(140, 152, 168))
     img.save(path)
     return path
 
 
 if __name__ == "__main__":
-    print(title("tools/card_title_ab.png"))
-    print(end("tools/card_end_ab.png"))
+    ap = argparse.ArgumentParser()
+    ap.add_argument("size", nargs="?", default="2b", choices=["2b", "4b"])
+    ap.add_argument("--pa")
+    ap.add_argument("--pb")
+    ap.add_argument("--ga")
+    ap.add_argument("--gb")
+    ap.add_argument("--gain")
+    a = ap.parse_args()
+
+    cfg = dict(PRESET[a.size])
+    for k in ("pa", "pb", "ga", "gb", "gain"):
+        v = getattr(a, k)
+        if v:
+            cfg[k] = v
+    model = a.size.upper()
+    print(title(f"tools/card_title_{a.size}.png", model))
+    print(end(f"tools/card_end_{a.size}.png", model=model, **cfg))

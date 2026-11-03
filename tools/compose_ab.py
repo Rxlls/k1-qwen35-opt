@@ -26,14 +26,13 @@ def read_phases(path):
     return d
 
 
-def badge(path):
-    """右上角『×4 快进』角标"""
+def badge(path, text="×4 快进"):
+    """右上角快进角标"""
     w, h = 168, 52
     img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
     d.rounded_rectangle([0, 0, w - 1, h - 1], radius=8, fill=(30, 79, 168, 235))
     f = ImageFont.truetype("C:/Windows/Fonts/msyhbd.ttc", 28)
-    text = "×4 快进"
     box = d.textbbox((0, 0), text, font=f)
     d.text(((w - (box[2] - box[0])) / 2, (h - (box[3] - box[1])) / 2 - 4),
            text, font=f, fill=(255, 255, 255, 255))
@@ -54,6 +53,7 @@ def main():
     ap.add_argument("--title", default="tools/card_title_ab.png")
     ap.add_argument("--end", default="tools/card_end_ab.png")
     ap.add_argument("--out", default="docs/demo/k1-2b-ab.mp4")
+    ap.add_argument("--speed", type=float, default=4.0, help="计时段快进倍率")
     args = ap.parse_args()
 
     p = read_phases(args.phases)
@@ -66,8 +66,10 @@ def main():
     a0, a1 = sec("A_START"), sec("A_DONE")
     b0, b1 = sec("B_START"), sec("B_DONE")
 
+    global SPEED
+    SPEED = args.speed
     tmp = tempfile.mkdtemp(prefix="ab_")
-    bd = badge(os.path.join(tmp, "badge.png"))
+    bd = badge(os.path.join(tmp, "badge.png"), "×%g 快进" % SPEED)
     fa = grab_frame(args.video, a1 + 1.2, os.path.join(tmp, "freeze_a.png"))
     fb = grab_frame(args.video, b1 + 1.0, os.path.join(tmp, "freeze_b.png"))
 
@@ -99,8 +101,8 @@ def main():
     dur = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration",
                           "-of", "default=nw=1:nk=1", args.out],
                          capture_output=True, text=True).stdout.strip()
-    print("片头 3s ｜ 说明段 %.1fs ｜ A %.1fs→%.1fs(4×) ｜ B %.1fs→%.1fs(4×) ｜ 片尾 6s"
-          % (ban_end, a0, a1, b0, b1))
+    print("片头 3s ｜ 说明段 %.1fs ｜ A %.1fs→%.1fs(%.0f×) ｜ B %.1fs→%.1fs(%.0f×) ｜ 片尾 6s"
+          % (ban_end, a0, a1, SPEED, b0, b1, SPEED))
     print("输出 %s，时长 %ss，%.0f KB" % (args.out, dur, os.path.getsize(args.out) / 1024))
 
 
