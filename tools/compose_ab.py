@@ -1,4 +1,4 @@
-"""把对照录屏剪成成片：片头 + 官方/自产两段（计时 4× 快进）+ 结果定格 + 片尾。
+"""把对照录屏剪成成片：片头 + 官方/自产两段（计时 N× 快进，由 --speed 指定）+ 结果定格 + 片尾。
 
 用法：python tools/compose_ab.py --video /tmp/k1_ab.mp4 --phases /tmp/cie_phases.saved.log
 """
@@ -26,7 +26,7 @@ def read_phases(path):
     return d
 
 
-def badge(path, text="×4 快进"):
+def badge(path, text="×N 快进"):
     """右上角快进角标"""
     w, h = 168, 52
     img = Image.new("RGBA", (w, h), (0, 0, 0, 0))

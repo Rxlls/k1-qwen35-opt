@@ -19,7 +19,7 @@ import tempfile
 import time
 import zipfile
 
-NAME = "24计春本1班潘荣轩"
+NAME = "k1-qwen35-opt"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # 六项交付物：缺任何一项都不应打包
@@ -86,7 +86,7 @@ def main():
         man = ["提交包清单",
                "生成时间: %s" % time.strftime("%Y-%m-%d %H:%M:%S"),
                "作品: 基于 K1 AI CPU 的 Qwen3.5 本地部署与性能优化",
-               "作者: 潘荣轩 2024112005 24计春本1班",
+               "作者: 潘荣轩",
                "文件数: %d    总大小: %.2f MB" % (len(rows) + 1, (total + 1) / 1024 / 1024),
                "",
                "%-62s %12s  %s" % ("路径", "字节", "sha256"),

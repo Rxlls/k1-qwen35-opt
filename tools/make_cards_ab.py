@@ -43,7 +43,7 @@ def base():
     return img, d
 
 
-def title(path, model="2B"):
+def title(path, model="2B", speed=6):
     img, d = base()
     d.text((84, 130), "对照实验", font=f(BOLD, 76), fill=INK)
     d.text((86, 240), f"Qwen3.5-{model} · 同一段 534 token 提示词 · 官方 vs 自产", font=f(REG, 30), fill=GRAY)
@@ -51,7 +51,7 @@ def title(path, model="2B"):
     d.text((86, 348), "K1 · Bianbu 2.3.5 · riscv64 · 4 核 1.6 GHz · llama.cpp 0.1.1",
            font=f(REG, 24), fill=GRAY)
     d.text((86, 396), "只换 GGUF 文件，运行时、线程数、参数完全相同", font=f(REG, 24), fill=GRAY)
-    d.text((86, 444), "计时段为 4× 快进，结果帧为实时画面", font=f(REG, 24), fill=GRAY)
+    d.text((86, 444), f"计时段为 {speed:g}× 快进（右上角角标），结果帧为实时画面", font=f(REG, 24), fill=GRAY)
     d.text((86, H - 96), "全国 RISC-V 高水平创新及应用大赛 · 进迭时空赛题",
            font=f(REG, 20), fill=(140, 152, 168))
     img.save(path)
@@ -102,6 +102,7 @@ if __name__ == "__main__":
     ap.add_argument("--ga")
     ap.add_argument("--gb")
     ap.add_argument("--gain")
+    ap.add_argument("--speed", type=float, default=6.0, help="与 compose_ab.py 的 --speed 保持一致")
     a = ap.parse_args()
 
     cfg = dict(PRESET[a.size])
@@ -110,5 +111,5 @@ if __name__ == "__main__":
         if v:
             cfg[k] = v
     model = a.size.upper()
-    print(title(f"tools/card_title_{a.size}.png", model))
+    print(title(f"tools/card_title_{a.size}.png", model, a.speed))
     print(end(f"tools/card_end_{a.size}.png", model=model, **cfg))
