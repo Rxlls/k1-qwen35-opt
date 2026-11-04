@@ -1,0 +1,27 @@
+===== Q4_0 =====
+ggml-spacemit: num_cores=4, core_ids=auto, arch_id=0xa03c, vlen=32, shared_mem=131072, use_ime1=1, use_ime2=0
+| model                          |       size |     params | backend    | ngl |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | --: | --------------: | -------------------: |
+| qwen35 4B Q4_0                 |   2.50 GiB |     4.21 B | SPACEMIT   |  -1 |   1 |           pp128 |          2.09 ± 0.00 |
+| qwen35 4B Q4_0                 |   2.50 GiB |     4.21 B | SPACEMIT   |  -1 |   1 |            tg16 |          1.28 ± 0.00 |
+
+build: unknown (0)
+rc=0
+===== Q4KM =====
+ggml-spacemit: num_cores=4, core_ids=auto, arch_id=0xa03c, vlen=32, shared_mem=131072, use_ime1=1, use_ime2=0
+| model                          |       size |     params | backend    | ngl |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | --: | --------------: | -------------------: |
+| qwen35 4B Q4_K - Medium        |   2.66 GiB |     4.21 B | SPACEMIT   |  -1 |   1 |           pp128 |          3.20 ± 0.00 |
+| qwen35 4B Q4_K - Medium        |   2.66 GiB |     4.21 B | SPACEMIT   |  -1 |   1 |            tg16 |          1.59 ± 0.00 |
+
+build: unknown (0)
+rc=0
+===== Q5KM =====
+ggml-spacemit: num_cores=4, core_ids=auto, arch_id=0xa03c, vlen=32, shared_mem=131072, use_ime1=1, use_ime2=0
+| model                          |       size |     params | backend    | ngl |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | --: | --------------: | -------------------: |
+| qwen35 4B Q5_K - Medium        |   3.00 GiB |     4.21 B | SPACEMIT   |  -1 |   1 |           pp128 |          1.12 ± 0.00 |
+| qwen35 4B Q5_K - Medium        |   3.00 GiB |     4.21 B | SPACEMIT   |  -1 |   1 |            tg16 |          0.77 ± 0.00 |
+
+build: unknown (0)
+rc=0
