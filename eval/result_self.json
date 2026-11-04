@@ -1,0 +1,637 @@
+{
+ "tag": "self",
+ "acc": 37.77777777777778,
+ "n": 90,
+ "items": [
+  {
+   "subject": "computer_network",
+   "answer": "C",
+   "pred": "B",
+   "raw": "B",
+   "correct": false
+  },
+  {
+   "subject": "computer_network",
+   "answer": "C",
+   "pred": "B",
+   "raw": "B",
+   "correct": false
+  },
+  {
+   "subject": "computer_network",
+   "answer": "C",
+   "pred": "C",
+   "raw": "C",
+   "correct": true
+  },
+  {
+   "subject": "computer_network",
+   "answer": "C",
+   "pred": "A",
+   "raw": "A",
+   "correct": false
+  },
+  {
+   "subject": "computer_network",
+   "answer": "D",
+   "pred": "B",
+   "raw": "B",
+   "correct": false
+  },
+  {
+   "subject": "computer_network",
+   "answer": "D",
+   "pred": "C",
+   "raw": "C",
+   "correct": false
+  },
+  {
+   "subject": "computer_network",
+   "answer": "C",
+   "pred": "B",
+   "raw": "B",
+   "correct": false
+  },
+  {
+   "subject": "computer_network",
+   "answer": "D",
+   "pred": "B",
+   "raw": "B",
+   "correct": false
+  },
+  {
+   "subject": "computer_network",
+   "answer": "C",
+   "pred": "A",
+   "raw": "A",
+   "correct": false
+  },
+  {
+   "subject": "computer_network",
+   "answer": "D",
+   "pred": "A",
+   "raw": "A",
+   "correct": false
+  },
+  {
+   "subject": "college_physics",
+   "answer": "A",
+   "pred": "C",
+   "raw": "C",
+   "correct": false
+  },
+  {
+   "subject": "college_physics",
+   "answer": "B",
+   "pred": "B",
+   "raw": "B",
+   "correct": true
+  },
+  {
+   "subject": "college_physics",
+   "answer": "C",
+   "pred": "B",
+   "raw": "B",
+   "correct": false
+  },
+  {
+   "subject": "college_physics",
+   "answer": "C",
+   "pred": "C",
+   "raw": "C",
+   "correct": true
+  },
+  {
+   "subject": "college_physics",
+   "answer": "C",
+   "pred": "D",
+   "raw": "D",
+   "correct": false
+  },
+  {
+   "subject": "college_physics",
+   "answer": "D",
+   "pred": "B",
+   "raw": "B",
+   "correct": false
+  },
+  {
+   "subject": "college_physics",
+   "answer": "A",
+   "pred": "A",
+   "raw": "A",
+   "correct": true
+  },
+  {
+   "subject": "college_physics",
+   "answer": "A",
+   "pred": "B",
+   "raw": "B",
+   "correct": false
+  },
+  {
+   "subject": "college_physics",
+   "answer": "B",
+   "pred": "B",
+   "raw": "B",
+   "correct": true
+  },
+  {
+   "subject": "college_physics",
+   "answer": "A",
+   "pred": "B",
+   "raw": "B",
+   "correct": false
+  },
+  {
+   "subject": "advanced_mathematics",
+   "answer": "B",
+   "pred": "B",
+   "raw": "B",
+   "correct": true
+  },
+  {
+   "subject": "advanced_mathematics",
+   "answer": "C",
+   "pred": "C",
+   "raw": "C",
+   "correct": true
+  },
+  {
+   "subject": "advanced_mathematics",
+   "answer": "D",
+   "pred": "B",
+   "raw": "B",
+   "correct": false
+  },
+  {
+   "subject": "advanced_mathematics",
+   "answer": "A",
+   "pred": "A",
+   "raw": "A",
+   "correct": true
+  },
+  {
+   "subject": "advanced_mathematics",
+   "answer": "A",
+   "pred": "B",
+   "raw": "B",
+   "correct": false
+  },
+  {
+   "subject": "advanced_mathematics",
+   "answer": "B",
+   "pred": "B",
+   "raw": "B",
+   "correct": true
+  },
+  {
+   "subject": "advanced_mathematics",
+   "answer": "B",
+   "pred": "B",
+   "raw": "B",
+   "correct": true
+  },
+  {
+   "subject": "advanced_mathematics",
+   "answer": "A",
+   "pred": "B",
+   "raw": "B",
+   "correct": false
+  },
+  {
+   "subject": "advanced_mathematics",
+   "answer": "B",
+   "pred": "B",
+   "raw": "B",
+   "correct": true
+  },
+  {
+   "subject": "advanced_mathematics",
+   "answer": "A",
+   "pred": "B",
+   "raw": "B",
+   "correct": false
+  },
+  {
+   "subject": "high_school_chemistry",
+   "answer": "A",
+   "pred": "A",
+   "raw": "A",
+   "correct": true
+  },
+  {
+   "subject": "high_school_chemistry",
+   "answer": "B",
+   "pred": "C",
+   "raw": "C",
+   "correct": false
+  },
+  {
+   "subject": "high_school_chemistry",
+   "answer": "C",
+   "pred": "B",
+   "raw": "B",
+   "correct": false
+  },
+  {
+   "subject": "high_school_chemistry",
+   "answer": "B",
+   "pred": "B",
+   "raw": "B",
+   "correct": true
+  },
+  {
+   "subject": "high_school_chemistry",
+   "answer": "C",
+   "pred": "A",
+   "raw": "A",
+   "correct": false
+  },
+  {
+   "subject": "high_school_chemistry",
+   "answer": "D",
+   "pred": "D",
+   "raw": "D",
+   "correct": true
+  },
+  {
+   "subject": "high_school_chemistry",
+   "answer": "B",
+   "pred": "A",
+   "raw": "A",
+   "correct": false
+  },
+  {
+   "subject": "high_school_chemistry",
+   "answer": "D",
+   "pred": "C",
+   "raw": "C",
+   "correct": false
+  },
+  {
+   "subject": "high_school_chemistry",
+   "answer": "D",
+   "pred": "C",
+   "raw": "C",
+   "correct": false
+  },
+  {
+   "subject": "high_school_chemistry",
+   "answer": "B",
+   "pred": "B",
+   "raw": "B",
+   "correct": true
+  },
+  {
+   "subject": "chinese_language_and_literature",
+   "answer": "D",
+   "pred": "B",
+   "raw": "B",
+   "correct": false
+  },
+  {
+   "subject": "chinese_language_and_literature",
+   "answer": "B",
+   "pred": "B",
+   "raw": "B",
+   "correct": true
+  },
+  {
+   "subject": "chinese_language_and_literature",
+   "answer": "D",
+   "pred": "A",
+   "raw": "A",
+   "correct": false
+  },
+  {
+   "subject": "chinese_language_and_literature",
+   "answer": "C",
+   "pred": "B",
+   "raw": "B",
+   "correct": false
+  },
+  {
+   "subject": "chinese_language_and_literature",
+   "answer": "D",
+   "pred": "C",
+   "raw": "C",
+   "correct": false
+  },
+  {
+   "subject": "chinese_language_and_literature",
+   "answer": "C",
+   "pred": "A",
+   "raw": "A",
+   "correct": false
+  },
+  {
+   "subject": "chinese_language_and_literature",
+   "answer": "B",
+   "pred": "B",
+   "raw": "B",
+   "correct": true
+  },
+  {
+   "subject": "chinese_language_and_literature",
+   "answer": "D",
+   "pred": "B",
+   "raw": "B",
+   "correct": false
+  },
+  {
+   "subject": "chinese_language_and_literature",
+   "answer": "A",
+   "pred": "C",
+   "raw": "C",
+   "correct": false
+  },
+  {
+   "subject": "chinese_language_and_literature",
+   "answer": "D",
+   "pred": "D",
+   "raw": "D",
+   "correct": true
+  },
+  {
+   "subject": "law",
+   "answer": "C",
+   "pred": "C",
+   "raw": "C",
+   "correct": true
+  },
+  {
+   "subject": "law",
+   "answer": "D",
+   "pred": "C",
+   "raw": "C",
+   "correct": false
+  },
+  {
+   "subject": "law",
+   "answer": "D",
+   "pred": "B",
+   "raw": "B",
+   "correct": false
+  },
+  {
+   "subject": "law",
+   "answer": "A",
+   "pred": "A",
+   "raw": "A",
+   "correct": true
+  },
+  {
+   "subject": "law",
+   "answer": "D",
+   "pred": "A",
+   "raw": "A",
+   "correct": false
+  },
+  {
+   "subject": "law",
+   "answer": "D",
+   "pred": "A",
+   "raw": "A",
+   "correct": false
+  },
+  {
+   "subject": "law",
+   "answer": "A",
+   "pred": "C",
+   "raw": "C",
+   "correct": false
+  },
+  {
+   "subject": "law",
+   "answer": "D",
+   "pred": "A",
+   "raw": "A",
+   "correct": false
+  },
+  {
+   "subject": "law",
+   "answer": "A",
+   "pred": "B",
+   "raw": "B",
+   "correct": false
+  },
+  {
+   "subject": "law",
+   "answer": "A",
+   "pred": "A",
+   "raw": "A",
+   "correct": true
+  },
+  {
+   "subject": "clinical_medicine",
+   "answer": "B",
+   "pred": "B",
+   "raw": "B",
+   "correct": true
+  },
+  {
+   "subject": "clinical_medicine",
+   "answer": "D",
+   "pred": "A",
+   "raw": "A",
+   "correct": false
+  },
+  {
+   "subject": "clinical_medicine",
+   "answer": "C",
+   "pred": "C",
+   "raw": "C",
+   "correct": true
+  },
+  {
+   "subject": "clinical_medicine",
+   "answer": "D",
+   "pred": "B",
+   "raw": "B",
+   "correct": false
+  },
+  {
+   "subject": "clinical_medicine",
+   "answer": "A",
+   "pred": "A",
+   "raw": "A",
+   "correct": true
+  },
+  {
+   "subject": "clinical_medicine",
+   "answer": "B",
+   "pred": "C",
+   "raw": "C",
+   "correct": false
+  },
+  {
+   "subject": "clinical_medicine",
+   "answer": "B",
+   "pred": "A",
+   "raw": "A",
+   "correct": false
+  },
+  {
+   "subject": "clinical_medicine",
+   "answer": "D",
+   "pred": "B",
+   "raw": "B",
+   "correct": false
+  },
+  {
+   "subject": "clinical_medicine",
+   "answer": "B",
+   "pred": "B",
+   "raw": "B",
+   "correct": true
+  },
+  {
+   "subject": "clinical_medicine",
+   "answer": "C",
+   "pred": "C",
+   "raw": "C",
+   "correct": true
+  },
+  {
+   "subject": "electrical_engineer",
+   "answer": "D",
+   "pred": "A",
+   "raw": "A",
+   "correct": false
+  },
+  {
+   "subject": "electrical_engineer",
+   "answer": "A",
+   "pred": "B",
+   "raw": "B",
+   "correct": false
+  },
+  {
+   "subject": "electrical_engineer",
+   "answer": "B",
+   "pred": "B",
+   "raw": "B",
+   "correct": true
+  },
+  {
+   "subject": "electrical_engineer",
+   "answer": "C",
+   "pred": "D",
+   "raw": "D",
+   "correct": false
+  },
+  {
+   "subject": "electrical_engineer",
+   "answer": "B",
+   "pred": "B",
+   "raw": "B",
+   "correct": true
+  },
+  {
+   "subject": "electrical_engineer",
+   "answer": "A",
+   "pred": "A",
+   "raw": "A",
+   "correct": true
+  },
+  {
+   "subject": "electrical_engineer",
+   "answer": "C",
+   "pred": "B",
+   "raw": "B",
+   "correct": false
+  },
+  {
+   "subject": "electrical_engineer",
+   "answer": "A",
+   "pred": "B",
+   "raw": "B",
+   "correct": false
+  },
+  {
+   "subject": "electrical_engineer",
+   "answer": "C",
+   "pred": "B",
+   "raw": "B",
+   "correct": false
+  },
+  {
+   "subject": "electrical_engineer",
+   "answer": "D",
+   "pred": "A",
+   "raw": "A",
+   "correct": false
+  },
+  {
+   "subject": "modern_chinese_history",
+   "answer": "C",
+   "pred": "B",
+   "raw": "B",
+   "correct": false
+  },
+  {
+   "subject": "modern_chinese_history",
+   "answer": "A",
+   "pred": "C",
+   "raw": "C",
+   "correct": false
+  },
+  {
+   "subject": "modern_chinese_history",
+   "answer": "D",
+   "pred": "D",
+   "raw": "D",
+   "correct": true
+  },
+  {
+   "subject": "modern_chinese_history",
+   "answer": "B",
+   "pred": "D",
+   "raw": "D",
+   "correct": false
+  },
+  {
+   "subject": "modern_chinese_history",
+   "answer": "C",
+   "pred": "C",
+   "raw": "C",
+   "correct": true
+  },
+  {
+   "subject": "modern_chinese_history",
+   "answer": "C",
+   "pred": "C",
+   "raw": "C",
+   "correct": true
+  },
+  {
+   "subject": "modern_chinese_history",
+   "answer": "C",
+   "pred": "B",
+   "raw": "B",
+   "correct": false
+  },
+  {
+   "subject": "modern_chinese_history",
+   "answer": "D",
+   "pred": "D",
+   "raw": "D",
+   "correct": true
+  },
+  {
+   "subject": "modern_chinese_history",
+   "answer": "D",
+   "pred": "D",
+   "raw": "D",
+   "correct": true
+  },
+  {
+   "subject": "modern_chinese_history",
+   "answer": "D",
+   "pred": "C",
+   "raw": "C",
+   "correct": false
+  }
+ ]
+}

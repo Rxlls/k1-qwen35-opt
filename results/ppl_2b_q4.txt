@@ -1,0 +1,38 @@
+===== Qwen3.5-2B-Q4_0.gguf =====
+CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0
+CPU_RISCV64_SPACEMIT: alloc_chunk: open(/dev/tcm_sync_mem) failed, errno=2
+CPU_RISCV64_SPACEMIT: failed to allocate init_barrier from shared mem, falling back to heap
+0.00.016.748 I common_init_result: fitting params to device memory ...
+0.00.016.774 I common_init_result: (for bugs during this step try to reproduce them with -fit off, or provide --verbose logs if the bug only occurs with -fit on)
+0.04.310.573 I common_params_fit_impl: projected to use 1010 MiB of host memory vs. 7849 MiB of total host memory
+0.13.246.477 W llama_context: n_ctx_seq (4096) < n_ctx_train (262144) -- the full capacity of the model will not be utilized
+0.13.372.218 W common_init_from_params: warming up the model with an empty run - please wait ... (--no-warmup to disable)
+0.14.120.904 I 
+0.14.121.292 I system_info: n_threads = 4 (n_threads_batch = 4) / 8 | CPU : RISCV_V = 1 | RVV_VLEN = 32 | LLAMAFILE = 1 | OPENMP = 1 | 
+0.14.121.342 I perplexity: tokenizing the input ..
+0.14.231.642 I perplexity: tokenization took 110.271 ms
+0.14.231.966 I perplexity: calculating perplexity over 2 chunks, n_ctx=4096, batch_size=512, n_seq=1
+10.26.689.015 I perplexity: 612.46 seconds per pass - ETA 20.40 minutes
+[1]12.2872,[2]13.5328,
+20.48.086.442 I Final estimate: PPL = 13.5328 +/- 0.66576
+
+rc=0
+===== Qwen3.5-2B-Q4_0-self.gguf =====
+CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0
+CPU_RISCV64_SPACEMIT: alloc_chunk: open(/dev/tcm_sync_mem) failed, errno=2
+CPU_RISCV64_SPACEMIT: failed to allocate init_barrier from shared mem, falling back to heap
+0.00.017.136 I common_init_result: fitting params to device memory ...
+0.00.017.161 I common_init_result: (for bugs during this step try to reproduce them with -fit off, or provide --verbose logs if the bug only occurs with -fit on)
+0.04.277.678 I common_params_fit_impl: projected to use 1077 MiB of host memory vs. 7849 MiB of total host memory
+0.13.552.229 W llama_context: n_ctx_seq (4096) < n_ctx_train (262144) -- the full capacity of the model will not be utilized
+0.13.682.369 W common_init_from_params: warming up the model with an empty run - please wait ... (--no-warmup to disable)
+0.14.110.378 I 
+0.14.110.767 I system_info: n_threads = 4 (n_threads_batch = 4) / 8 | CPU : RISCV_V = 1 | RVV_VLEN = 32 | LLAMAFILE = 1 | OPENMP = 1 | 
+0.14.110.841 I perplexity: tokenizing the input ..
+0.14.219.032 I perplexity: tokenization took 108.161 ms
+0.14.219.353 I perplexity: calculating perplexity over 2 chunks, n_ctx=4096, batch_size=512, n_seq=1
+8.56.952.558 I perplexity: 522.73 seconds per pass - ETA 17.42 minutes
+[1]12.5008,[2]13.7112,
+17.45.009.138 I Final estimate: PPL = 13.7112 +/- 0.67110
+
+rc=0
