@@ -23,27 +23,32 @@ SRC = os.path.join(ROOT, "docs/demo/k1-demo-silent.mp4")
 OUT = os.path.join(ROOT, "docs/demo/k1-demo-final.mp4")
 WORK = "C:/Users/RX/AppData/Local/Temp/voice"
 
-VOICE = "zh-CN-YunyangNeural"
-RATE = "+6%"
+VOICE = "zh-CN-YunxiNeural"          # 云希·阳光男声（比新闻腔更亲和）
+RATE = "+0%"
 
 # (起始秒, 旁白)。文字是"读出来的稿子"，Q4_0 写成"Q4 零"才会被读成 Q4 零而非下划线。
 LINES = [
-    (0.5,   "进迭时空 K1 上，我们把 Qwen3.5 的权重压进 IME 的定点通路。"),
+    # 发音实测（2026-11-06，云希）：
+    #   "32K" 被逐位读成"三二K" → 必须写"三十二K"
+    #   "两B"/"2B" 的 B 按拼音读作 bì（与"两臂"时长完全一致）→ 改用"二十亿/四十亿"
+    #   "K1" 读作"K一"、Qwen3.5 读作"Qwen 三点五"、prefill/decode 按英文词读，均正确
+    (0.5,   "在进迭时空 K1 上，我们把 Qwen三点五的权重统一压成 Q4零。"),
     (8.0,   "先看交付包：解压之后直接跑自检，十一项全部通过。"),
-    (14.0,  "接下来是 2B 的对照：同一段提示词，同一个运行时，只换量化文件。"),
+    (14.0,  "接下来是二十亿的对照：同一段提示词，同一个运行时，只换量化文件。"),
     (22.0,  "左边是官方发布的文件，右边是我们自己量化的。计算过程快进。"),
-    (43.0,  "官方 2B 是 10.78。"),
+    (42.9,  "官方的二十亿模型是 10.78。"),
     (47.5,  "换成自产文件。"),
-    (56.0,  "自产 20.24，提升 87.8%。差别不在体积，而在张量类型有没有命中白名单。"),
-    (64.5,  "同样的方法用在 4B 上。"),
-    (70.0,  "4B 这一段比较慢，快进十六倍；它的权重是 2B 的两倍，每一步都更慢。"),
-    (107.0, "官方 4B 跑出 3.80。"),
+    (56.0,  "自产 20.24，提升 87.8%。"),
+    (60.9,  "差别不在体积，而在张量类型有没有命中 IME 白名单。"),
+    (68.2,  "同样的方法用在四十亿上。"),
+    (72.5,  "四十亿这一段比较慢，快进十六倍；它的权重是二十亿的两倍，每一步都更慢。"),
+    (107.0, "官方四十亿跑出 3.80。"),
     (111.5, "自产文件跑同一段提示词。"),
-    (126.0, "自产 8.10，提升 113.2%。模型越大，权重矩阵乘占比越高，增益也更大。"),
+    (126.0, "自产 8.10，提升 113.2%。模型越大，矩阵乘占比越高，增益也更大。"),
     (135.0, "多轮对话时，运行时会保存上下文检查点。"),
     (145.0, "第二轮直接复用了上一轮，从 30 秒降到 12 秒。"),
     (155.0, "但每个检查点约二十兆，粒度不可能更细。"),
-    (178.5, "32K 输入也能跑，prefill 保持率 24.9%；但首字要 67 分钟。"),
+    (178.5, "三十二K输入也能跑，prefill 保持率 24.9%；但首字要 67 分钟。"),
     (188.0, "这一段是原始记录回放，实际跑了七十分钟。"),
     (200.6, "总结：prefill 提升近九成和一倍，首字延迟降四到五成；"
             "decode 受带宽限制，已在文档中如实记录。"),
@@ -80,6 +85,7 @@ def main():
     ap.add_argument("--voice", default=VOICE)
     ap.add_argument("--rate", default=RATE)
     ap.add_argument("--list", action="store_true")
+    ap.add_argument("--out", default=OUT, help="输出路径（默认覆盖成片）")
     args = ap.parse_args()
 
     if not os.path.exists(SRC):
@@ -132,11 +138,12 @@ def main():
     sh(cmd)
     print("混音完成：%.1f s" % dur(mixed))
 
+    out_path = args.out
     sh(["ffmpeg", "-y", "-loglevel", "error", "-i", SRC, "-i", mixed,
         "-map", "0:v:0", "-map", "1:a:0", "-c:v", "copy",
-        "-c:a", "aac", "-b:a", "128k", "-shortest", "-movflags", "+faststart", OUT])
+        "-c:a", "aac", "-b:a", "128k", "-shortest", "-movflags", "+faststart", out_path])
     print("成片（带旁白）：%s  %.2f MB  %.1f s"
-          % (os.path.basename(OUT), os.path.getsize(OUT) / 1048576, dur(OUT)))
+          % (os.path.basename(out_path), os.path.getsize(out_path) / 1048576, dur(out_path)))
 
     with open(os.path.join(WORK, "script.json"), "w", encoding="utf-8") as f:
         json.dump({"voice": args.voice, "rate": args.rate,

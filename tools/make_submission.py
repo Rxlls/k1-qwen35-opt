@@ -44,7 +44,7 @@ README_CODE = """本包对应平台「其他材料附件」字段，内容为完
 README_VIDEO = """本包对应平台「项目演示视频」字段。
 
 k1-demo-final.mp4 —— 1920x1080 / 30fps / 3 分 31 秒，K1 实机录屏 + 中文旁白 + 字幕卡片。
-旁白由 edge-tts 合成（zh-CN-YunyangNeural，男声，语速 +6%），无背景音乐。
+旁白由 edge-tts 合成（zh-CN-YunxiNeural，男声，语速 0%），无背景音乐。
 
 内容顺序（时间为成片实测位置）：
   1. 片头（0:00）
