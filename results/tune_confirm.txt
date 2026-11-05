@@ -1,0 +1,72 @@
+===== 复验：4K 深度 ub=256 vs 512（各 2 次）=====
+--- run1 ub=256 ---
+CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0
+CPU_RISCV64_SPACEMIT: alloc_chunk: open(/dev/tcm_sync_mem) failed, errno=2
+CPU_RISCV64_SPACEMIT: failed to allocate init_barrier from shared mem, falling back to heap
+| model                          |       size |     params | backend    | threads | n_batch | n_ubatch | fa | mmap |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | ------: | ------: | -------: | -: | ---: | --------------: | -------------------: |
+| qwen35 2B Q4_0                 |   1.22 GiB |     1.88 B | CPU        |       4 |     256 |      256 |  1 |    0 |   pp512 @ d4096 |         15.04 ± 0.00 |
+
+build: 17ce6aa (1)
+--- run1 ub=512 ---
+CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0
+CPU_RISCV64_SPACEMIT: alloc_chunk: open(/dev/tcm_sync_mem) failed, errno=2
+CPU_RISCV64_SPACEMIT: failed to allocate init_barrier from shared mem, falling back to heap
+| model                          |       size |     params | backend    | threads | n_batch | fa | mmap |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | ------: | ------: | -: | ---: | --------------: | -------------------: |
+| qwen35 2B Q4_0                 |   1.22 GiB |     1.88 B | CPU        |       4 |     512 |  1 |    0 |   pp512 @ d4096 |         14.42 ± 0.00 |
+
+build: 17ce6aa (1)
+--- run2 ub=256 ---
+CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0
+CPU_RISCV64_SPACEMIT: alloc_chunk: open(/dev/tcm_sync_mem) failed, errno=2
+CPU_RISCV64_SPACEMIT: failed to allocate init_barrier from shared mem, falling back to heap
+| model                          |       size |     params | backend    | threads | n_batch | n_ubatch | fa | mmap |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | ------: | ------: | -------: | -: | ---: | --------------: | -------------------: |
+| qwen35 2B Q4_0                 |   1.22 GiB |     1.88 B | CPU        |       4 |     256 |      256 |  1 |    0 |   pp512 @ d4096 |         15.13 ± 0.00 |
+
+build: 17ce6aa (1)
+--- run2 ub=512 ---
+CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0
+CPU_RISCV64_SPACEMIT: alloc_chunk: open(/dev/tcm_sync_mem) failed, errno=2
+CPU_RISCV64_SPACEMIT: failed to allocate init_barrier from shared mem, falling back to heap
+| model                          |       size |     params | backend    | threads | n_batch | fa | mmap |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | ------: | ------: | -: | ---: | --------------: | -------------------: |
+| qwen35 2B Q4_0                 |   1.22 GiB |     1.88 B | CPU        |       4 |     512 |  1 |    0 |   pp512 @ d4096 |         14.54 ± 0.00 |
+
+build: 17ce6aa (1)
+===== d0 上 ub 的影响 =====
+--- d0 ub=256 ---
+CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0
+CPU_RISCV64_SPACEMIT: alloc_chunk: open(/dev/tcm_sync_mem) failed, errno=2
+CPU_RISCV64_SPACEMIT: failed to allocate init_barrier from shared mem, falling back to heap
+| model                          |       size |     params | backend    | threads | n_batch | n_ubatch | fa | mmap |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | ------: | ------: | -------: | -: | ---: | --------------: | -------------------: |
+| qwen35 2B Q4_0                 |   1.22 GiB |     1.88 B | CPU        |       4 |     256 |      256 |  1 |    0 |           pp512 |         21.04 ± 0.00 |
+| qwen35 2B Q4_0                 |   1.22 GiB |     1.88 B | CPU        |       4 |     256 |      256 |  1 |    0 |            tg64 |          2.71 ± 0.00 |
+
+build: 17ce6aa (1)
+--- d0 ub=512 ---
+CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0
+CPU_RISCV64_SPACEMIT: alloc_chunk: open(/dev/tcm_sync_mem) failed, errno=2
+CPU_RISCV64_SPACEMIT: failed to allocate init_barrier from shared mem, falling back to heap
+| model                          |       size |     params | backend    | threads | n_batch | fa | mmap |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | ------: | ------: | -: | ---: | --------------: | -------------------: |
+| qwen35 2B Q4_0                 |   1.22 GiB |     1.88 B | CPU        |       4 |     512 |  1 |    0 |           pp512 |         19.99 ± 0.00 |
+| qwen35 2B Q4_0                 |   1.22 GiB |     1.88 B | CPU        |       4 |     512 |  1 |    0 |            tg64 |          2.72 ± 0.00 |
+
+build: 17ce6aa (1)
+===== 并发吞吐（batched-bench, npl=1/2/4）=====
+CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0
+CPU_RISCV64_SPACEMIT: alloc_chunk: open(/dev/tcm_sync_mem) failed, errno=2
+CPU_RISCV64_SPACEMIT: failed to allocate init_barrier from shared mem, falling back to heap
+0.07.949.125 W llama_context: n_ctx_seq (2048) < n_ctx_train (262144) -- the full capacity of the model will not be utilized
+
+main: n_kv_max = 8192, n_batch = 2048, n_ubatch = 512, flash_attn = 1, is_pp_shared = 0, is_tg_separate = 0, n_gpu_layers = -1, n_threads = 4, n_threads_batch = 4
+
+|    PP |     TG |    B |   N_KV |   T_PP s | S_PP t/s |   T_TG s | S_TG t/s |      T s |    S t/s |
+|-------|--------|------|--------|----------|----------|----------|----------|----------|----------|
+|   512 |     64 |    1 |    576 |   25.425 |    20.14 |   23.690 |     2.70 |   49.115 |    11.73 |
+|   512 |     64 |    2 |   1152 |   48.845 |    20.96 |   36.613 |     3.50 |   85.458 |    13.48 |
+|   512 |     64 |    4 |   2304 |   93.456 |    21.91 |   67.854 |     3.77 |  161.311 |    14.28 |
+
