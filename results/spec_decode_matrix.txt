@@ -1,0 +1,10 @@
+===== 0.8B alone =====
+[ Prompt: 18.4 t/s | Generation: 5.2 t/s ]
+===== 2B baseline =====
+[ Prompt: 19.7 t/s | Generation: 2.7 t/s ]
+===== 2B + 0.8B draft =====
+[ Prompt: 9.5 t/s | Generation: 1.6 t/s ]
+===== 4B baseline =====
+[ Prompt: 8.2 t/s | Generation: 1.4 t/s ]
+===== 4B + 0.8B draft =====
+[ Prompt: 5.6 t/s | Generation: 1.4 t/s ]
