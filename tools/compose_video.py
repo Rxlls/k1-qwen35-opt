@@ -16,7 +16,8 @@ W, H = 1920, 1080
 FPS = 30
 IN = "C:/Users/RX/AppData/Local/Temp/vid"
 WORK = "C:/Users/RX/AppData/Local/Temp/compose"
-OUT = "docs/demo/k1-demo-final.mp4"
+OUT = "docs/demo/k1-demo-silent.mp4"       # 无音轨母版；配旁白由 tools/add_voice.py 生成最终成片
+FINAL = "docs/demo/k1-demo-final.mp4"
 
 FONT_CN = "C:/Windows/Fonts/msyhbd.ttc"
 FONT_EN = "C:/Windows/Fonts/arialbd.ttf"
@@ -181,7 +182,7 @@ def main():
           "32K 仍有效：保持率 24.9% / 21.1%",
           "decode 受带宽限制，未突破 —— 已在文档中如实记录"],
          os.path.join(WORK, "c9.png"), accent="#3fb950")
-    p = os.path.join(WORK, "c9.mp4"); cardclip(os.path.join(WORK, "c9.png"), 9, p); add(p)
+    p = os.path.join(WORK, "c9.mp4"); cardclip(os.path.join(WORK, "c9.png"), 11, p); add(p)
 
     # ---- 拼接 ----
     lst = os.path.join(WORK, "list.txt")
