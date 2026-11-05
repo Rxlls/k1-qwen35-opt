@@ -46,20 +46,39 @@ def phases(path):
 
 
 def card(title, lines, out, accent="#2ea3f2"):
+    """标题卡：水平居中；标题可用 \\n 分行，过长时自动收字号以保住两侧安全边距。"""
     img = Image.new("RGB", (W, H), "#0d1117")
     d = ImageDraw.Draw(img)
     d.rectangle([0, 0, W, 8], fill=accent)
-    f1 = ImageFont.truetype(FONT_CN, 96)
+
+    MARGIN = 140                      # 左右安全边距
+    usable = W - 2 * MARGIN
+    tl = title.split("\n")
+    ts = 96
+    while ts > 48:
+        f1 = ImageFont.truetype(FONT_CN, ts)
+        if max(f1.getbbox(t)[2] for t in tl) <= usable:
+            break
+        ts -= 2
+    f1 = ImageFont.truetype(FONT_CN, ts)   # 循环结束时未创建/需按最终字号重建
     f2 = ImageFont.truetype(FONT_CN, 48)
-    total = 96 + 40 + len(lines) * 76
+    if ts < 96:
+        print("  卡片字号自适应：%d → %d（最长行 %d px）"
+              % (96, ts, max(f1.getbbox(t)[2] for t in tl)))
+
+    th = int(ts * 1.22)               # 标题行高
+    lh = 76
+    total = th * len(tl) + 40 + len(lines) * lh
     y = (H - total) // 2
-    d.text((120, y), title, font=f1, fill="#ffffff")
-    y += 96 + 40
+    for t in tl:
+        d.text(((W - f1.getbbox(t)[2]) // 2, y), t, font=f1, fill="#ffffff")
+        y += th
+    y += 40
     for ln in lines:
-        d.text((120, y), ln, font=f2, fill="#c9d1d9")
-        y += 76
+        d.text(((W - f2.getbbox(ln)[2]) // 2, y), ln, font=f2, fill="#c9d1d9")
+        y += lh
     img.save(out)
-    print("  卡片:", os.path.basename(out), title)
+    print("  卡片:", os.path.basename(out), title.replace("\n", " / "))
 
 
 def seg(src, start, end, speed, out, label=None, crop=True):
@@ -99,7 +118,7 @@ def main():
         clips.append(p)
 
     # ---- 片头 ----
-    card("把权重压进 IME：K1 上的 Qwen3.5 加速",
+    card("把权重压进 IME\nK1 上的 Qwen3.5 加速",
          ["进迭时空 K1 · 8×X60 @1.6 GHz · 8 GB",
           "统一 Q4_0 量化：命中 IME 定点通路",
           "2B prefill +87.8%   ·   4B +113.2%"],

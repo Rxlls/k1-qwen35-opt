@@ -41,6 +41,23 @@ README_CODE = """本包对应平台「其他材料附件」字段，内容为完
 预期：check 末尾输出「结果: 通过 11 项，失败 0 项」。
 """
 
+README_VIDEO = """本包对应平台「项目演示视频」字段。
+
+k1-demo-final.mp4 —— 1920x1080 / 30fps / 约 3 分 30 秒，K1 实机录屏 + 字幕卡片。
+
+内容顺序（时间为成片实测位置）：
+  1. 片头（0:00）
+  2. 交付包自检：解压提交包 → deploy.sh check → 11 项全部通过（0:06）
+  3. 2B 对照：同一 prompt，官方 GGUF vs 自产 GGUF（0:13 说明卡 / 0:21 起为实测）
+  4. 4B 对照：同上（1:00 说明卡 / 1:09 起为实测）
+  5. 多轮对话：检查点复用，第 2 轮从 30.4 s 降到 12.2 s（2:10）
+  6. 长上下文：32K 实测原始记录与五点衰减（2:57）
+  7. 片尾：结果与边界（3:20）
+
+说明：对照段的计算过程按 8~16 倍快进，画面中的 t/s 由 llama-bench 自行统计；
+录屏抓帧会占用约 4% CPU，故画面数字略低于技术文档中的权威值（+87.8% / +113.2%）。
+"""
+
 README_PROOF = """本包对应平台「相关证明材料」字段：结果可核查性材料（不是资格类证明）。
 
 00  参赛信息与材料说明.docx —— 先读这份，含四个提交位的对应关系与复现步骤
@@ -120,10 +137,18 @@ def main():
         readme(zf, README_PROOF)
         return a + b
 
+    def video(zf):
+        src = os.path.join(ROOT, "docs/demo/k1-demo-final.mp4")
+        zf.write(src, "k1-demo-final.mp4")
+        readme(zf, README_VIDEO)
+        return 1
+
     print("生成提交包 → %s" % OUT)
     build("%s-技术文档.zip" % NAME, tech)
     build("%s-其他材料.zip" % NAME, code)
     build("%s-证明材料.zip" % NAME, proof)
+    if os.path.exists(os.path.join(ROOT, "docs/demo/k1-demo-final.mp4")):
+        build("%s-演示视频.zip" % NAME, video)
     print("\n完成。视频成片就绪后，把 mp4 放进 提交/ 再执行本脚本的 video 段（或在打包脚本中补一行）。")
     return 0
 
