@@ -22,7 +22,7 @@ FONT_CN = "C:/Windows/Fonts/msyhbd.ttc"
 FONT_EN = "C:/Windows/Fonts/arialbd.ttf"
 
 # 录屏画面里要去掉的部分：顶部标签栏 34px、底部任务栏
-CROP = "crop=1440:810:0:34,scale=1920:1080"
+CROP = "scale=1920:1080"          # 整屏保留 shell 外框，不再裁切放大
 
 
 def sh(cmd):
