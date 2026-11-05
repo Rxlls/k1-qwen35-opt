@@ -50,6 +50,10 @@ POLICIES = {
         # 查表类张量不参与矩阵乘，可与权重用不同类型
         "lookup_suffix": {"token_embd.weight"},
         "warn_1d": {"F32", "F16"},
+        # 结构性 F32/F16：conv1d、小投影等行宽不足一个 block 的张量，
+        # 量化器本身会回退到 F16/F32（见 03_quantize.sh 注释），不算违规。
+        # 用「元素数 ≤ 该阈值」判定，避免把真正的大矩阵 F32 也放过。
+        "struct_max_elems": 1_000_000,
     },
     "k1-ime2": {
         "desc": "假设设备具备 IME2（i8i5 可用）——仅用于对照，本机不适用",
@@ -57,6 +61,7 @@ POLICIES = {
         "lookup_ok": {"Q8_0", "Q6_K", "F16", "F32"},
         "lookup_suffix": {"token_embd.weight"},
         "warn_1d": {"F32", "F16"},
+        "struct_max_elems": 1_000_000,
     },
     "any": {
         "desc": "不设白名单：只检查类型是否可被 GGML 加载",
@@ -64,6 +69,7 @@ POLICIES = {
         "lookup_ok": set(BPP) | {"I8", "I16", "I32", "I64"},
         "lookup_suffix": {"token_embd.weight"},
         "warn_1d": set(BPP),
+        "struct_max_elems": 1_000_000,
     },
 }
 
@@ -77,7 +83,7 @@ def classify(name, dims, policy):
 
 def evaluate(tensors, policy):
     """对张量列表执行策略，返回结果字典（不打印）。"""
-    matmul_total = matmul_bad = lookup_bad = vec_unusual = 0
+    matmul_total = matmul_bad = lookup_bad = vec_unusual = struct_ok = 0
     ok_bytes = all_bytes = 0
     bad = []
     lookup_types = collections.Counter()
@@ -110,6 +116,10 @@ def evaluate(tensors, policy):
             matmul_total += 1
             if tn in policy["matmul_ok"]:
                 ok_bytes += nbytes
+            elif tn in ("F32", "F16") and n_elem <= policy["struct_max_elems"]:
+                # conv1d、窄投影等：行宽不足一个 block，量化器会主动回退，属正常
+                struct_ok += 1
+                ok_bytes += nbytes
             else:
                 matmul_bad += 1
                 bad.append((name, tn, "矩阵乘张量掉出加速白名单", "fail"))
@@ -119,6 +129,7 @@ def evaluate(tensors, policy):
         "matmul_bad": matmul_bad,
         "lookup_bad": lookup_bad,
         "vec_unusual": vec_unusual,
+        "struct_ok": struct_ok,
         "coverage": (ok_bytes / all_bytes * 100) if all_bytes else 0.0,
         "violations": bad,
         "lookup_types": dict(lookup_types),
@@ -130,8 +141,10 @@ def evaluate(tensors, policy):
 def report(path, res, policy, policy_name, verbose=False):
     print("== %s" % os.path.basename(path))
     print("   策略 %s：%s" % (policy_name, policy["desc"]))
-    print("   二维权重 %d 个，命中白名单 %d 个（字节覆盖率 %.1f%%）"
-          % (res["matmul_total"], res["matmul_total"] - res["matmul_bad"], res["coverage"]))
+    print("   二维权重 %d 个：命中白名单 %d、结构性 F32/F16 %d、未命中 %d（字节覆盖率 %.1f%%）"
+          % (res["matmul_total"],
+             res["matmul_total"] - res["matmul_bad"] - res["struct_ok"],
+             res["struct_ok"], res["matmul_bad"], res["coverage"]))
     if res["lookup_types"]:
         print("   查表张量：%s" % ", ".join("%s x%d" % (k, v) for k, v in res["lookup_types"].items()))
     fails = [v for v in res["violations"] if v[3] == "fail"]
