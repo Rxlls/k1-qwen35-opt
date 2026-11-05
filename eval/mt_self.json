@@ -1,0 +1,329 @@
+{
+ "tag": "self",
+ "items": [
+  {
+   "id": "T01",
+   "topic": "技术",
+   "rows": [
+    {
+     "turn": 1,
+     "answer": "4096 MiB",
+     "expect": "4096",
+     "prompt_tokens": 179,
+     "wall": 12.2
+    },
+    {
+     "turn": 2,
+     "answer": "6",
+     "expect": "6",
+     "prompt_tokens": 212,
+     "wall": 2.9
+    },
+    {
+     "turn": 3,
+     "answer": "4096",
+     "expect": "682",
+     "prompt_tokens": 236,
+     "wall": 4.6
+    }
+   ]
+  },
+  {
+   "id": "T02",
+   "topic": "技术",
+   "rows": [
+    {
+     "turn": 1,
+     "answer": "2.50 GiB",
+     "expect": "2.50",
+     "prompt_tokens": 185,
+     "wall": 11.1
+    },
+    {
+     "turn": 2,
+     "answer": "3.12 GiB",
+     "expect": "3.12",
+     "prompt_tokens": 218,
+     "wall": 4.8
+    },
+    {
+     "turn": 3,
+     "answer": "0.62",
+     "expect": "0.62",
+     "prompt_tokens": 251,
+     "wall": 5.6
+    }
+   ]
+  },
+  {
+   "id": "T03",
+   "topic": "技术",
+   "rows": [
+    {
+     "turn": 1,
+     "answer": "17.6 秒",
+     "expect": "17.6",
+     "prompt_tokens": 185,
+     "wall": 11.1
+    },
+    {
+     "turn": 2,
+     "answer": "294 token",
+     "expect": "294",
+     "prompt_tokens": 218,
+     "wall": 4.0
+    },
+    {
+     "turn": 3,
+     "answer": "17.6 秒",
+     "expect": "35",
+     "prompt_tokens": 256,
+     "wall": 6.8
+    }
+   ]
+  },
+  {
+   "id": "T04",
+   "topic": "生活",
+   "rows": [
+    {
+     "turn": 1,
+     "answer": "周三下午三点",
+     "expect": "周三下午三点",
+     "prompt_tokens": 177,
+     "wall": 9.9
+    },
+    {
+     "turn": 2,
+     "answer": "B203",
+     "expect": "B203",
+     "prompt_tokens": 206,
+     "wall": 3.4
+    },
+    {
+     "turn": 3,
+     "answer": "B203",
+     "expect": "B203",
+     "prompt_tokens": 232,
+     "wall": 4.7
+    }
+   ]
+  },
+  {
+   "id": "T05",
+   "topic": "生活",
+   "rows": [
+    {
+     "turn": 1,
+     "answer": "MU5137",
+     "expect": "MU5137",
+     "prompt_tokens": 181,
+     "wall": 10.7
+    },
+    {
+     "turn": 2,
+     "answer": "08:40",
+     "expect": "08:40",
+     "prompt_tokens": 213,
+     "wall": 3.9
+    },
+    {
+     "turn": 3,
+     "answer": "08:40",
+     "expect": "08:40",
+     "prompt_tokens": 239,
+     "wall": 5.3
+    }
+   ]
+  },
+  {
+   "id": "T06",
+   "topic": "生活",
+   "rows": [
+    {
+     "turn": 1,
+     "answer": "1200 元",
+     "expect": "1200",
+     "prompt_tokens": 179,
+     "wall": 12.0
+    },
+    {
+     "turn": 2,
+     "answer": "8 人",
+     "expect": "8",
+     "prompt_tokens": 211,
+     "wall": 3.2
+    },
+    {
+     "turn": 3,
+     "answer": "600 元/人",
+     "expect": "150",
+     "prompt_tokens": 234,
+     "wall": 5.8
+    }
+   ]
+  },
+  {
+   "id": "T07",
+   "topic": "数学",
+   "rows": [
+    {
+     "turn": 1,
+     "answer": "3",
+     "expect": "3",
+     "prompt_tokens": 176,
+     "wall": 10.1
+    },
+    {
+     "turn": 2,
+     "answer": "5",
+     "expect": "5",
+     "prompt_tokens": 203,
+     "wall": 2.3
+    },
+    {
+     "turn": 3,
+     "answer": "38",
+     "expect": "48",
+     "prompt_tokens": 228,
+     "wall": 3.9
+    }
+   ]
+  },
+  {
+   "id": "T08",
+   "topic": "数学",
+   "rows": [
+    {
+     "turn": 1,
+     "answer": "12 厘米",
+     "expect": "12",
+     "prompt_tokens": 179,
+     "wall": 11.3
+    },
+    {
+     "turn": 2,
+     "answer": "7 厘米",
+     "expect": "7",
+     "prompt_tokens": 209,
+     "wall": 3.2
+    },
+    {
+     "turn": 3,
+     "answer": "84 平方厘米",
+     "expect": "84",
+     "prompt_tokens": 231,
+     "wall": 5.0
+    }
+   ]
+  },
+  {
+   "id": "T09",
+   "topic": "数学",
+   "rows": [
+    {
+     "turn": 1,
+     "answer": "八折",
+     "expect": "八折",
+     "prompt_tokens": 177,
+     "wall": 9.5
+    },
+    {
+     "turn": 2,
+     "answer": "250 元",
+     "expect": "250",
+     "prompt_tokens": 205,
+     "wall": 3.7
+    },
+    {
+     "turn": 3,
+     "answer": "200 元",
+     "expect": "200",
+     "prompt_tokens": 231,
+     "wall": 5.1
+    }
+   ]
+  },
+  {
+   "id": "T10",
+   "topic": "代码",
+   "rows": [
+    {
+     "turn": 1,
+     "answer": "load_model",
+     "expect": "load_model",
+     "prompt_tokens": 175,
+     "wall": 10.4
+    },
+    {
+     "turn": 2,
+     "answer": "指针",
+     "expect": "指针",
+     "prompt_tokens": 204,
+     "wall": 2.3
+    },
+    {
+     "turn": 3,
+     "answer": "指针",
+     "expect": "指针",
+     "prompt_tokens": 228,
+     "wall": 3.4
+    }
+   ]
+  },
+  {
+   "id": "T11",
+   "topic": "代码",
+   "rows": [
+    {
+     "turn": 1,
+     "answer": "WARN",
+     "expect": "WARN",
+     "prompt_tokens": 174,
+     "wall": 9.9
+    },
+    {
+     "turn": 2,
+     "answer": "srv.log",
+     "expect": "srv.log",
+     "prompt_tokens": 202,
+     "wall": 2.6
+    },
+    {
+     "turn": 3,
+     "answer": "srv.log",
+     "expect": "srv.log",
+     "prompt_tokens": 226,
+     "wall": 3.9
+    }
+   ]
+  },
+  {
+   "id": "T12",
+   "topic": "代码",
+   "rows": [
+    {
+     "turn": 1,
+     "answer": "30 秒",
+     "expect": "30",
+     "prompt_tokens": 179,
+     "wall": 11.3
+    },
+    {
+     "turn": 2,
+     "answer": "3",
+     "expect": "3",
+     "prompt_tokens": 211,
+     "wall": 2.4
+    },
+    {
+     "turn": 3,
+     "answer": "30 秒",
+     "expect": "90",
+     "prompt_tokens": 233,
+     "wall": 4.8
+    }
+   ]
+  }
+ ]
+}
