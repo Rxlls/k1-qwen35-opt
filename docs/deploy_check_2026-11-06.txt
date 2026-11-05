@@ -1,0 +1,43 @@
+########## deploy.sh check ##########
+ K1 Qwen3.5 推理优化 · 部署验证
+ 时间: 2026-11-06 00:56:03   主机: aa
+==========================================================
+
+== 环境检查 ==
+  [OK]   架构 riscv64
+  [OK]   RVV 向量扩展在位
+  [OK]   IME AI 扩展在位（K1 独有）
+  [OK]   内存 7849 MB
+  [OK]   可用磁盘 52 GB
+  [OK]   系统: Bianbu 2.3.5
+  [OK]   内核: 6.6.63
+  [OK]   已安装 llama.cpp-tools-spacemit (0.1.1-bpo1+6)
+  [OK]   已安装 spacemit-tcm (3.0.0-bpo1+2)
+  [OK]   TCM 设备节点存在 (/dev/tcm) crw-------
+  [OK]   /dev/tcm 为默认 600 —— 原版 0.1.1 将回退纯堆内存，这是预期且最快的行为，请勿 chmod
+
+==========================================================
+ 结果: 通过 11 项，失败 0 项
+==========================================================
+
+########## deploy.sh models（sha256 校验）##########
+
+== 模型文件校验 ==
+  目录: /tmp/relcheck/models
+  [OK]   Qwen3.5-2B-Q4_0-self.gguf  1265 MB
+  [OK]   Qwen3.5-4B-Q4_0-self.gguf  2573 MB
+  发现哈希清单，校验中（较慢，约 1 分钟）...
+Qwen3.5-2B-Q4_0-self.gguf: 成功
+Qwen3.5-4B-Q4_0-self.gguf: 成功
+  [OK]   sha256 校验通过
+  [OK]   中间件 4 个，token_embd 形状正常（不计入项数）
+
+==========================================================
+ 结果: 通过 3 项，失败 0 项
+==========================================================
+
+########## 环境 ##########
+Linux aa 6.6.63 #2.2.9.2 SMP PREEMPT Tue Jan 27 21:48:13 UTC 2026 riscv64 riscv64 riscv64 GNU/Linux
+
+ii  llama.cpp-tools-spacemit 0.1.1-bpo1+6 riscv64      auto-generated package by debmake
+ii  spacemit-tcm             3.0.0-bpo1+2 riscv64      auto-generated package by debmake

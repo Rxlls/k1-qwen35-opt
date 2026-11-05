@@ -77,3 +77,6 @@ MANIFEST.sha256
 # slidep 工作缓存
 .slidep/
 **/.slidep/
+# 提交产物（可由 tools/make_submission.py 重新生成）
+提交/*.zip
+提交/*.tar.gz
