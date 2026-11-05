@@ -80,6 +80,16 @@ for f in ${OUT:-$base-Q4_0.gguf} ${OUT:-$base-Q4KM-q8emb.gguf}; do
 done
 
 echo
+echo "== 部署门禁（k1 策略：矩阵乘权重必须命中 IME 白名单）=="
+for f in ${OUT:-$base-Q4_0.gguf} ${OUT:-$base-Q4KM-q8emb.gguf}; do
+  [ -f "$f" ] || continue
+  out=$(python3 "$CIE/tools/quant_check.py" "$f" --policy k1 2>/dev/null); rc=$?
+  echo "$out" | sed 's/^/  /'
+  [ "$rc" -ne 0 ] && \
+    echo "  ⚠ 该产物未通过 k1 门禁：仅可用于对照实验，不要写进 models/ 作为交付物"
+done
+
+echo
 echo "== 下一步 =="
 echo "  拷贝到 K1 的 \$CIE/models/，然后:"
 echo "    bash tools/bench_quick.sh \$(basename 产物.gguf) <tag>"
