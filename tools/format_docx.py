@@ -12,6 +12,7 @@
 import sys
 import docx
 from docx.oxml.ns import qn
+from docx.shared import Pt, RGBColor
 from docx.oxml import OxmlElement
 
 BODY = "宋体"
@@ -31,6 +32,8 @@ def set_run_font(run, name):
         rPr.insert(0, rFonts)
     for attr in ("w:ascii", "w:hAnsi", "w:eastAsia", "w:cs"):
         rFonts.set(qn(attr), name)
+    # pandoc 会带 w:hint="eastAsia"，导致 ASCII 走 eastAsia 字体；改回 default
+    rFonts.set(qn("w:hint"), "default")
 
 
 def set_style_font(doc, style_name, font):
@@ -49,9 +52,46 @@ def set_style_font(doc, style_name, font):
     return True
 
 
-def fit_table_to_window(table):
-    """tblW=pct 5000 (100% 页宽) + tblLayout=autofit"""
-    tblPr = table._tbl.tblPr
+def fit_table_to_window(table, total_twips=8845):
+    """按内容长度分配列宽：pandoc 给出的 gridCol 有时把首列压到 1.7cm，
+    正文会被挤成一字一行。这里按每列最长内容重算，并给最小宽度兜底。"""
+    tbl = table._tbl
+    tblPr = tbl.tblPr
+    grid = tbl.find(qn("w:tblGrid"))
+    if grid is None:
+        return
+    cols = grid.findall(qn("w:gridCol"))
+    n = len(cols)
+    if n == 0:
+        return
+
+    lens = [0] * n
+    for row in table.rows:
+        for i, cell in enumerate(row.cells):
+            if i >= n:
+                break
+            w = sum(2 if ord(ch) > 127 else 1 for ch in (cell.text or ""))
+            lens[i] = max(lens[i], w)
+
+    weights = [max(5, min(L, 42)) for L in lens]      # 单列权重封顶，避免长段落吃掉整表
+    s = sum(weights)
+    widths = [max(1300, int(total_twips * w / s)) for w in weights]
+    s2 = sum(widths)
+    widths = [int(w * total_twips / s2) for w in widths]
+
+    for g, w in zip(cols, widths):
+        g.set(qn("w:w"), str(w))
+    for row in table.rows:
+        for i, cell in enumerate(row.cells):
+            if i >= n:
+                break
+            tcPr = cell._tc.get_or_add_tcPr()
+            tcW = tcPr.find(qn("w:tcW"))
+            if tcW is None:
+                tcW = OxmlElement("w:tcW")
+                tcPr.append(tcW)
+            tcW.set(qn("w:w"), str(widths[i]))
+            tcW.set(qn("w:type"), "dxa")
 
     tblW = tblPr.find(qn("w:tblW"))
     if tblW is None:
@@ -68,9 +108,60 @@ def fit_table_to_window(table):
     if layout is None:
         layout = OxmlElement("w:tblLayout")
         tblW.addnext(layout)
-    layout.set(qn("w:type"), "autofit")
+    layout.set(qn("w:type"), "fixed")
 
-    table.autofit = True
+
+def style_table(table):
+    """细边框 + 表头浅底 + 跨页重复表头：pandoc 默认的表格几乎没有框线。"""
+    tbl = table._tbl
+    tblPr = tbl.tblPr
+
+    old = tblPr.find(qn("w:tblBorders"))
+    if old is not None:
+        tblPr.remove(old)
+    borders = OxmlElement("w:tblBorders")
+    for edge, sz, color in (("top", 8, "7F7F7F"), ("left", 8, "7F7F7F"),
+                            ("bottom", 8, "7F7F7F"), ("right", 8, "7F7F7F"),
+                            ("insideH", 4, "BFBFBF"), ("insideV", 4, "BFBFBF")):
+        el = OxmlElement("w:" + edge)
+        el.set(qn("w:val"), "single")
+        el.set(qn("w:sz"), str(sz))
+        el.set(qn("w:space"), "0")
+        el.set(qn("w:color"), color)
+        borders.append(el)
+    layout = tblPr.find(qn("w:tblLayout"))
+    if layout is not None:
+        layout.addprevious(borders)
+    else:
+        tblPr.append(borders)
+
+    if not table.rows:
+        return
+    hdr = table.rows[0]
+    trPr = hdr._tr.get_or_add_trPr()
+    if trPr.find(qn("w:tblHeader")) is None:
+        trPr.append(OxmlElement("w:tblHeader"))      # 跨页时重复表头
+    for cell in hdr.cells:
+        tcPr = cell._tc.get_or_add_tcPr()
+        shd = OxmlElement("w:shd")
+        shd.set(qn("w:val"), "clear")
+        shd.set(qn("w:color"), "auto")
+        shd.set(qn("w:fill"), "F2F4F7")
+        tcPr.append(shd)
+        for par in cell.paragraphs:
+            for r in par.runs:
+                r.bold = True
+
+    # 表内统一小五（9pt）、行距压紧：列多时避免“+25.0%”被拆成两行
+    for row in table.rows:
+        for cell in row.cells:
+            for par in cell.paragraphs:
+                par.paragraph_format.space_before = Pt(2)
+                par.paragraph_format.space_after = Pt(2)
+                par.paragraph_format.line_spacing = 1.05
+                par.paragraph_format.first_line_indent = Pt(0)
+                for r in par.runs:
+                    r.font.size = Pt(9)
 
 
 def main():
@@ -94,6 +185,20 @@ def main():
             font, n_body = BODY, n_body + 1
         for r in p.runs:
             set_run_font(r, font)
+        if font == CODE:                      # 代码块：8pt + 浅底，减少长行折行
+            pf = p.paragraph_format
+            pf.space_before = Pt(2)
+            pf.space_after = Pt(2)
+            pf.line_spacing = 1.0
+            pPr = p._p.get_or_add_pPr()
+            shd = OxmlElement("w:shd")
+            shd.set(qn("w:val"), "clear")
+            shd.set(qn("w:color"), "auto")
+            shd.set(qn("w:fill"), "F7F8FA")
+            pPr.append(shd)
+            for r in p.runs:
+                r.font.size = Pt(8)
+                r.font.color.rgb = RGBColor(0x1a, 0x1a, 0x1a)
 
     # 3) 表格内文字
     n_cell = 0
@@ -109,6 +214,7 @@ def main():
     n_tbl = 0
     for t in doc.tables:
         fit_table_to_window(t)
+        style_table(t)
         n_tbl += 1
 
     doc.save(dst)
