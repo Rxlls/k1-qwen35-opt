@@ -48,7 +48,6 @@
 │   ├── 技术文档.md          技术文档（优化策略、测试报告、完整数据）
 │   ├── DEPLOY.md            模型转换与部署说明（含故障排查手册）
 │   ├── PATCH_TCM.md         框架改造设计说明 + 实施与验证记录
-│   ├── DEFENSE.md           答辩提纲
 │   ├── PLANNING.md          启动阶段计划（保留以记录判断与修正）
 │   └── VERSIONS.md          环境与产物版本档案
 ├── scripts/                 全流程脚本（按序号执行）
@@ -161,7 +160,6 @@ bash tools/bench_quick.sh Qwen3.5-2B-Q4_0-self.gguf 2b_q4self
 | [docs/AUDIT.md](docs/AUDIT.md) | 数据核对报告：哪些数字有归档、哪些已撤回、还剩什么没闭环 |
 | [docs/DEMO_SHOTS.md](docs/DEMO_SHOTS.md) | 演示图说明：实机截屏与整理图的区分、每张图该出现的数字 |
 | [docs/VERSIONS.md](docs/VERSIONS.md) | 环境版本、产物 sha256、镜像校验值 |
-| [docs/DEFENSE.md](docs/DEFENSE.md) | 答辩提纲与预设问答 |
 | [docs/PLANNING.md](docs/PLANNING.md) | 启动阶段计划（保留以记录当时的判断与修正） |
 
 ## 未包含在仓库中的内容

@@ -80,3 +80,10 @@ MANIFEST.sha256
 # 提交产物（可由 tools/make_submission.py 重新生成）
 提交/*.zip
 提交/*.tar.gz
+
+# 内部材料（自评、答辩、提交流程），不进代码仓库
+评分表.xlsx
+答辩演示/
+docs/DEFENSE.md
+00_提交说明.md
+提交/
