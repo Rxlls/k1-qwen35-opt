@@ -164,11 +164,33 @@ def style_table(table):
                     r.font.size = Pt(9)
 
 
+def strip_vert_align(doc):
+    """pandoc 会把 Markdown 里的 `A~B~C`（中间无空格）解析成下标；
+    技术文档不需要上/下标，统一清掉，避免整段文字缩成小字压在行间。"""
+    n = 0
+    paras = list(doc.paragraphs)
+    for t in doc.tables:
+        for row in t.rows:
+            for cell in row.cells:
+                paras += cell.paragraphs
+    for para in paras:
+        for r in para.runs:
+            rPr = r._element.rPr
+            if rPr is None:
+                continue
+            for va in rPr.findall(qn("w:vertAlign")):
+                rPr.remove(va); n += 1
+    return n
+
+
 def main():
     src = sys.argv[1] if len(sys.argv) > 1 else "docs/技术文档.docx"
     dst = sys.argv[2] if len(sys.argv) > 2 else src
 
     doc = docx.Document(src)
+    n_va = strip_vert_align(doc)
+    if n_va:
+        print("      清除误生成的上/下标 run: %d 个" % n_va)
 
     # 1) 样式层面：Normal 设为宋体（兜底，未显式设置的文字也生效）
     set_style_font(doc, "Normal", BODY)

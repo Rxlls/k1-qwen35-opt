@@ -1,0 +1,46 @@
+########## ub=256 与 d0 补测（2026-11-06 14:30） ##########
+背景：§8.10 的 ub=256 补测当时未写入 results/，此处补正式记录；同时补官方 d0 的 -r 2 记录
+
+----- Qwen3.5-2B-Q4_0  ub=256 -----
+CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0
+CPU_RISCV64_SPACEMIT: alloc_chunk: open(/dev/tcm_sync_mem) failed, errno=2
+CPU_RISCV64_SPACEMIT: failed to allocate init_barrier from shared mem, falling back to heap
+| model                          |       size |     params | backend    | threads | n_batch | n_ubatch | fa | mmap |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | ------: | ------: | -------: | -: | ---: | --------------: | -------------------: |
+| qwen35 2B Q4_0                 |   1.12 GiB |     1.88 B | CPU        |       4 |     256 |      256 |  1 |    0 |           pp512 |         11.09 ± 0.01 |
+| qwen35 2B Q4_0                 |   1.12 GiB |     1.88 B | CPU        |       4 |     256 |      256 |  1 |    0 |            tg64 |          2.89 ± 0.01 |
+
+build: 17ce6aa (1)
+
+----- Qwen3.5-2B-Q4_0-self  ub=256 -----
+CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0
+CPU_RISCV64_SPACEMIT: alloc_chunk: open(/dev/tcm_sync_mem) failed, errno=2
+CPU_RISCV64_SPACEMIT: failed to allocate init_barrier from shared mem, falling back to heap
+| model                          |       size |     params | backend    | threads | n_batch | n_ubatch | fa | mmap |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | ------: | ------: | -------: | -: | ---: | --------------: | -------------------: |
+| qwen35 2B Q4_0                 |   1.22 GiB |     1.88 B | CPU        |       4 |     256 |      256 |  1 |    0 |           pp512 |         21.00 ± 0.04 |
+| qwen35 2B Q4_0                 |   1.22 GiB |     1.88 B | CPU        |       4 |     256 |      256 |  1 |    0 |            tg64 |          2.77 ± 0.00 |
+
+build: 17ce6aa (1)
+
+----- 官方 d0（ub 默认 512） -----
+CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0
+CPU_RISCV64_SPACEMIT: alloc_chunk: open(/dev/tcm_sync_mem) failed, errno=2
+CPU_RISCV64_SPACEMIT: failed to allocate init_barrier from shared mem, falling back to heap
+| model                          |       size |     params | backend    | threads | fa | mmap |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | ------: | -: | ---: | --------------: | -------------------: |
+| qwen35 2B Q4_0                 |   1.12 GiB |     1.88 B | CPU        |       4 |  1 |    0 |           pp512 |         10.89 ± 0.05 |
+| qwen35 2B Q4_0                 |   1.12 GiB |     1.88 B | CPU        |       4 |  1 |    0 |            tg64 |          2.89 ± 0.00 |
+
+build: 17ce6aa (1)
+
+----- 自产 d0（复测） -----
+CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0
+CPU_RISCV64_SPACEMIT: alloc_chunk: open(/dev/tcm_sync_mem) failed, errno=2
+CPU_RISCV64_SPACEMIT: failed to allocate init_barrier from shared mem, falling back to heap
+| model                          |       size |     params | backend    | threads | fa | mmap |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | ------: | -: | ---: | --------------: | -------------------: |
+| qwen35 2B Q4_0                 |   1.22 GiB |     1.88 B | CPU        |       4 |  1 |    0 |           pp512 |         20.31 ± 0.03 |
+| qwen35 2B Q4_0                 |   1.22 GiB |     1.88 B | CPU        |       4 |  1 |    0 |            tg64 |          2.78 ± 0.00 |
+
+build: 17ce6aa (1)
