@@ -185,6 +185,10 @@ def main():
             font, n_body = BODY, n_body + 1
         for r in p.runs:
             set_run_font(r, font)
+        if sname == "Block Text":             # 引用块：中文斜体难读，改正体 + 深灰
+            for r in p.runs:
+                r.italic = False
+                r.font.color.rgb = RGBColor(0x3a, 0x3a, 0x3a)
         if font == CODE:                      # 代码块：8pt + 浅底，减少长行折行
             pf = p.paragraph_format
             pf.space_before = Pt(2)
