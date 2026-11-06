@@ -54,7 +54,7 @@ Qwen3.5采用8×(3×Gated DeltaNet → 1×Gated Attention)布局，4B规格为32
 | 4B本地部署稳定运行      | 6  | 同上，且不OOM              | 同上                                                         | RSS峰值记录、无swap thrash                 |
 | 自行完成转换量化且可复现    | 5  | 从官方原始权重到GGUF的全链路脚本    | `scripts/00_fetch.sh` → `01_convert.sh` → `02_quantize.sh` | 输入/输出sha256清单、固定commit、一条命令重跑        |
 | 规定长上下文稳定运行      | 5  | 撑住指定ctx不崩             | ctx阶梯测试报告                                                  | 8K/16K/32K逐级通过，64K为加分                |
-| 固定测试集多轮推理质量可用   | 3  | 不是胡言乱语                | 40题×3轮固定测试集+评分表                                            | 人工rubric+跨平台一致性指标                    |
+| 固定测试集多轮推理质量可用   | 3  | 不是胡言乱语                | 40题×3轮固定测试集+人工评分记录                                            | 人工rubric+跨平台一致性指标                    |
 | Prefill吞吐+口径    | 10 | 数字怎么测的、是否可比           | `llama-bench`原始输出                                          | pp64/pp512/pp2048，3次取中位数，标注线程/量化/ctx |
 | 首token延迟优化+来源   | 10 | TTFT降了多少、为什么降         | TTFT专项对比表                                                  | 优化前后TTFT，且能拆到“量化/线程/批大小/内核”各贡献多少     |
 | Decode吞吐+口径     | 10 | 同上                    | `llama-bench`/`llama-server` metrics                       | tg32/tg128/tg512，含长时稳定性曲线            |
