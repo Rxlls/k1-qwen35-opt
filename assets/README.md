@@ -18,7 +18,7 @@
   `docs/figs/demo/raw/` 下另有同批次其余原始截屏。
 - `02`～`05` 为根据 `results/` 实测数据绘制的图表，非设备照片。
 
-MUSE Pi Pro 与 MUSE Book 同为 K1 开发板的整机形态，本项目全部实测在 K1 笔记本（MUSE Book）上完成。
+MUSE Pi Pro 与 MUSE Book 内里同为 K1 开发板，硬件一致；本项目全部实测在 K1 笔记本（MUSE Book）上完成。
 
 ## 演示视频
 
