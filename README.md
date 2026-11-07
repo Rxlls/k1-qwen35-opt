@@ -5,14 +5,7 @@
 [![OS](https://img.shields.io/badge/OS-Bianbu%202.3.5-green)]()
 [![Runtime](https://img.shields.io/badge/Runtime-llama.cpp%200.1.1-orange)]()
 [![Model](https://img.shields.io/badge/Model-Qwen3.5%202B%20%2F%204B-purple)]()
-[![Quant](https://img.shields.io/badge/Quant-Uniform%20Q4__0-red)]()
-[![Prefill](https://img.shields.io/badge/Prefill-%2B87.8%25%20%2F%20%2B113.2%25-success)]()
-[![Context](https://img.shields.io/badge/Context-32K%20measured-blueviolet)]()
-[![Decode](https://img.shields.io/badge/Decode-bandwidth%20bound-lightgrey)]()
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
-[![Report](https://img.shields.io/badge/Report-57%20pages%20%2F%2082%20tables-important)](docs/技术文档.md)
-[![Demo](https://img.shields.io/badge/Demo-3m31s%20video-ff69b4)](docs/demo/k1-demo-final.mp4)
-[![Status](https://img.shields.io/badge/Status-Public%20%2F%20CIE%202026-brightgreen)](https://github.com/Rxlls/k1-qwen35-opt)
 
 > 仓库名 `k1-qwen35-opt` ｜ 「权重归队」：让散落在混合精度里的权重统一回到 IME 定点快路径。
 
