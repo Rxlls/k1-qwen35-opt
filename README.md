@@ -66,7 +66,7 @@
 | 运行时 | `llama.cpp-tools-spacemit` 0.1.1（build `17ce6aa`） |
 | 模型 | `Qwen/Qwen3.5-2B`、`Qwen/Qwen3.5-4B`（官方后训练权重） |
 
-> MUSE Pi Pro 与 MUSE Book 均为 K1 开发板的整机形态，核心硬件一致；本项目全部实测在 K1 笔记本（MUSE Book）上完成。
+> MUSE Pi Pro 与 MUSE Book 内里同为 K1 开发板，硬件一致；本项目全部实测在 K1 笔记本（MUSE Book）上完成。
 
 ## 目录结构
 
