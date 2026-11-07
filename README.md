@@ -1,8 +1,24 @@
-# k1-qwen35-opt
+# 权重归队
+
+[![Platform](https://img.shields.io/badge/Platform-RISC--V%20K1-blue)](https://www.spacemit.com/)
+[![Board](https://img.shields.io/badge/Board-MUSE%20Book%20K1-informational)]()
+[![OS](https://img.shields.io/badge/OS-Bianbu%202.3.5-green)]()
+[![Runtime](https://img.shields.io/badge/Runtime-llama.cpp%200.1.1-orange)]()
+[![Model](https://img.shields.io/badge/Model-Qwen3.5%202B%20%2F%204B-purple)]()
+[![Quant](https://img.shields.io/badge/Quant-Uniform%20Q4__0-red)]()
+[![Prefill](https://img.shields.io/badge/Prefill-%2B87.8%25%20%2F%20%2B113.2%25-success)]()
+[![Context](https://img.shields.io/badge/Context-32K%20measured-blueviolet)]()
+[![Decode](https://img.shields.io/badge/Decode-bandwidth%20bound-lightgrey)]()
+[![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
+[![Report](https://img.shields.io/badge/Report-57%20pages%20%2F%2082%20tables-important)](docs/技术文档.md)
+[![Demo](https://img.shields.io/badge/Demo-3m31s%20video-ff69b4)](docs/demo/k1-demo-final.mp4)
+[![Status](https://img.shields.io/badge/Status-Public%20%2F%20CIE%202026-brightgreen)](https://github.com/Rxlls/k1-qwen35-opt)
+
+> 仓库名 `k1-qwen35-opt` ｜ 「权重归队」：让散落在混合精度里的权重统一回到 IME 定点快路径。
 
 | 项 | 内容 |
 |---|---|
-| **项目名称** | 把权重压进 IME：K1 上的 Qwen3.5 加速 |
+| **项目名称** | 权重归队 |
 | **参赛队伍** | panpan最努力 |
 | **赛事** | 全国 RISC-V 高水平创新及应用大赛（第二届）· CIE 进迭时空赛道 |
 | **开源许可** | [MIT](LICENSE)；第三方组件见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) |
@@ -43,12 +59,14 @@
 
 | 项 | 规格 |
 |---|---|
-| 设备 | 进迭时空 K1 笔记本（MUSE Book 形态，8 × X60 / 8 GB）；本项目**未在 MUSE Pi Pro 上实测** |
+| 设备 | 进迭时空 K1 笔记本（MUSE Book，8 × X60 / 8 GB） |
 | CPU | 8 × X60 @ 1.6 GHz，含 RVV 1.0、Zvfh、**IME** 扩展 |
 | 内存 | 8 GB LPDDR4x-2666（有效带宽 10.6 GB/s） |
 | 系统 | Bianbu 2.3.5 LXQt，内核 6.6.63 |
 | 运行时 | `llama.cpp-tools-spacemit` 0.1.1（build `17ce6aa`） |
 | 模型 | `Qwen/Qwen3.5-2B`、`Qwen/Qwen3.5-4B`（官方后训练权重） |
+
+> MUSE Pi Pro 与 MUSE Book 均为 K1 开发板的整机形态，核心硬件一致；本项目全部实测在 K1 笔记本（MUSE Book）上完成。
 
 ## 目录结构
 
@@ -145,6 +163,10 @@ bash tools/bench_quick.sh Qwen3.5-2B-Q4_0-self.gguf 2b_q4self
 
 ## 演示与截图
 
+**设备外观**（K1 笔记本 / MUSE Book）：
+
+![K1 笔记本实物](assets/00-k1-device.png)
+
 **演示视频**：[`docs/demo/k1-demo-final.mp4`](docs/demo/k1-demo-final.mp4)
 （[GitHub 在线播放](https://github.com/Rxlls/k1-qwen35-opt/blob/main/docs/demo/k1-demo-final.mp4)）
 — 1920×1080 / 3 分 31 秒 / 中文旁白，K1 桌面整屏实机录制，保留终端窗口与任务栏。
@@ -160,7 +182,7 @@ bash tools/bench_quick.sh Qwen3.5-2B-Q4_0-self.gguf 2b_q4self
 ![prefill 吞吐：2B +87.8%、4B +113.2%](assets/02-prefill-gain.png)
 
 其余图表：[长上下文衰减](assets/03-context-decay.png) · [IME 白名单判定](assets/04-ime-whitelist.png) · [线程数扩展](assets/05-thread-scaling.png)。
-全部素材的来源与口径见 [assets/README.md](assets/README.md)；本项目**未拍摄设备实物照片**，不以示意图冒充。
+全部素材的来源与口径见 [assets/README.md](assets/README.md)；`01-k1-terminal.png` 及 `docs/figs/demo/raw/` 为 K1 桌面原始终端截屏。
 
 ## 关键发现
 
