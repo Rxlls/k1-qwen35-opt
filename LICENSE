@@ -19,11 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-Third-party components are covered by their own licenses:
-
-- llama.cpp (spacemit-com fork): see https://github.com/spacemit-com/llama.cpp
-- Qwen3.5 model weights: Apache-2.0, see https://huggingface.co/Qwen/Qwen3.5-2B
-- spine-runtime (vendor/): copyright SpacemiT, see vendor/README.md

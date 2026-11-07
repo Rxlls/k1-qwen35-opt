@@ -1,7 +1,18 @@
 # k1-qwen35-opt
 
+| 项 | 内容 |
+|---|---|
+| **项目名称** | 把权重压进 IME：K1 上的 Qwen3.5 加速 |
+| **参赛队伍** | panpan最努力 |
+| **赛事** | 全国 RISC-V 高水平创新及应用大赛（第二届）· CIE 进迭时空赛道 |
+| **开源许可** | [MIT](LICENSE)；第三方组件见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) |
+
 在进迭时空 K1 笔记本（RISC-V，8GB 内存）上部署并优化 Qwen3.5-2B / 4B 的本地推理。
 基于进迭时空开源 llama.cpp，构建从官方原始权重到量化 GGUF 的完整可复现管线。
+
+> 本项目是一份 **RISC-V 边缘推理应用案例**：不改动硬件与运行时，仅重建量化管线，
+> 让全部矩阵乘权重落入 K1 的 IME 定点快路径。完整复现见 [快速开始](#快速开始)，
+> 设计文档见 [文档索引](#文档索引)，演示见 [演示与截图](#演示与截图)。
 
 **核心结果：在不改动硬件与运行时的前提下，仅通过自建量化管线替换官方预置 GGUF，prefill 吞吐提升 87.8%（2B）/ 113.2%（4B）。**
 
@@ -32,7 +43,7 @@
 
 | 项 | 规格 |
 |---|---|
-| 设备 | 进迭时空 K1 笔记本（MUSE Book 类） |
+| 设备 | 进迭时空 K1 笔记本（MUSE Book 形态，8 × X60 / 8 GB）；本项目**未在 MUSE Pi Pro 上实测** |
 | CPU | 8 × X60 @ 1.6 GHz，含 RVV 1.0、Zvfh、**IME** 扩展 |
 | 内存 | 8 GB LPDDR4x-2666（有效带宽 10.6 GB/s） |
 | 系统 | Bianbu 2.3.5 LXQt，内核 6.6.63 |
@@ -49,7 +60,9 @@
 │   ├── DEPLOY.md            模型转换与部署说明（含故障排查手册）
 │   ├── PATCH_TCM.md         框架改造设计说明 + 实施与验证记录
 │   ├── PLANNING.md          启动阶段计划（保留以记录判断与修正）
-│   └── VERSIONS.md          环境与产物版本档案
+│   ├── VERSIONS.md          环境与产物版本档案
+│   ├── figs/                图表与实机截屏原件
+│   └── demo/                演示视频（k1-demo-final.mp4，带中文旁白）
 ├── scripts/                 全流程脚本（按序号执行）
 │   ├── 00_fetch_models.sh   下载官方原始权重（x86）
 │   ├── 01_convert.sh        HF → f16 GGUF
@@ -67,11 +80,13 @@
 │   ├── quality_v2.sh        质量测试（关闭思考模式）
 │   ├── quality_prompts.txt  20 题固定测试集
 │   └── ...
+├── assets/                  演示截图与数据图（README 引用，见 assets/README.md）
 ├── configs/                 推荐参数与实测基线
 ├── patches/                 框架改造补丁
 ├── results/                 全部原始测量数据与评审记录
 ├── vendor/                  第三方预编译依赖（spine-runtime，仅 v0.2.3 构建用）
-├── LICENSE                  MIT
+├── LICENSE                  MIT（标准文本）
+├── THIRD_PARTY_NOTICES.md   第三方组件许可与分发边界
 └── README.md
 ```
 
@@ -123,6 +138,25 @@ bash tools/bench_quick.sh Qwen3.5-2B-Q4_0-self.gguf 2b_q4self
 # 固定口径：-t 4 -fa 1 -mmp 0 -r 3
 ```
 
+## 演示与截图
+
+**演示视频**：[`docs/demo/k1-demo-final.mp4`](docs/demo/k1-demo-final.mp4)
+（[GitHub 在线播放](https://github.com/Rxlls/k1-qwen35-opt/blob/main/docs/demo/k1-demo-final.mp4)）
+— 1920×1080 / 3 分 31 秒 / 中文旁白，K1 桌面整屏实机录制，保留终端窗口与任务栏。
+内容依次为：交付包自检（11 项通过）→ 2B 官方与自产对照 → 4B 对照 → 多轮检查点复用（30.4 s → 12.2 s）→ 32K 长上下文原始记录 → 结果边界。
+> 视频暂未上传 B 站/网盘，仓库内文件即可直接播放；32K 实跑需 67 分钟，片中该段为原始记录回放，已明确标注。
+
+**实机终端截屏**（同一条 `llama-bench` 命令下，官方 GGUF 与自产 GGUF 的原始输出）：
+
+![K1 实机终端截屏](assets/01-k1-terminal.png)
+
+**核心结果**：
+
+![prefill 吞吐：2B +87.8%、4B +113.2%](assets/02-prefill-gain.png)
+
+其余图表：[长上下文衰减](assets/03-context-decay.png) · [IME 白名单判定](assets/04-ime-whitelist.png) · [线程数扩展](assets/05-thread-scaling.png)。
+全部素材的来源与口径见 [assets/README.md](assets/README.md)；本项目**未拍摄设备实物照片**，不以示意图冒充。
+
 ## 关键发现
 
 1. **量化类型是二元判定，不是体积梯度**
@@ -160,6 +194,8 @@ bash tools/bench_quick.sh Qwen3.5-2B-Q4_0-self.gguf 2b_q4self
 | [docs/AUDIT.md](docs/AUDIT.md) | 数据核对报告：哪些数字有归档、哪些已撤回、还剩什么没闭环 |
 | [docs/VERSIONS.md](docs/VERSIONS.md) | 环境版本、产物 sha256、镜像校验值 |
 | [docs/PLANNING.md](docs/PLANNING.md) | 启动阶段计划（保留以记录当时的判断与修正） |
+| [docs/技术文档.docx](docs/技术文档.docx) | 技术文档排版版（57 页 / 82 表 / 4 图，含封面与目录） |
+| [docs/方案书.docx](docs/方案书.docx) | 方案书排版版（13 页） |
 
 ## 未包含在仓库中的内容
 
@@ -172,5 +208,11 @@ bash tools/bench_quick.sh Qwen3.5-2B-Q4_0-self.gguf 2b_q4self
 
 ## 许可证
 
-本项目代码采用 MIT 许可证。模型权重遵循 Qwen 官方许可（Apache-2.0）。
-运行时基于 [spacemit-com/llama.cpp](https://github.com/spacemit-com/llama.cpp)，遵循其原始许可。
+本项目自身代码与文档采用 [MIT 许可证](LICENSE)（标准文本，GitHub 可直接识别）。
+模型权重、上游运行时与 `vendor/` 第三方依赖各自遵循原始许可，分发边界见
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+
+## 联系
+
+问题与建议请通过 [GitHub Issues](https://github.com/Rxlls/k1-qwen35-opt/issues) 提交。
+开源案例提交与奖励事宜由队伍 panpan最努力 与进迭时空社区对接。
